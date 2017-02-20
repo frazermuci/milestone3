@@ -14,16 +14,21 @@ using namespace std;
 webSocket server;
 ConnectionManager cm = ConnectionManager(&server, 12, 9);//server is not initialized..well see.
 int count = 0;
-
+time_t  timev;
+//time(&timev);
 
 /* called when a client connects */
 void openHandler(int clientID)
 {
+	time(&timev);
+	time_t temp = timev;
 	ostringstream os;
 	//bool isZero = count == 0;
 	//os << "init"<<":"<<isZero?"2:2":"4:4";
-	os << "init:" << count;
+	
 	cm.connNumWithClientID(clientID, count);
+	time(&timev);
+	os << "init:" << count << ":" <<(timev-temp);
 	cm.send(clientID, os.str());
 	/*int x,y = 4;
 	if(isZero)
@@ -82,36 +87,39 @@ void initializeConnection(int clientID, vector<string> mVect)
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message)
 {
-		cout << message << endl;
-		vector<string> mVect = parseMessage(message);
-		if(isInitMessage(mVect.at(0)))
-		{
-			//parse message and get id
-			cout << "clientID: " << clientID << " otherID: " << mVect.at(1) << endl;
-			initializeConnection(clientID, mVect);
-			return;
-		}
-		if(cm.connReady())
-		{
-			//update model from message
-			cout << "desrialize" << endl;
-		       
-			cm.updateModel(clientID, cm.deserialize((unsigned char*)message.c_str()));
-		}
-		if(cm.stateReady(clientID))
-		{			
-			//serializing new state
-			Compressed* c = static_cast<Compressed*>(malloc(sizeof(struct Compressed)));
+	time(&timev);
+	time_t temp = timev;
+	cout << message << endl;
+	vector<string> mVect = parseMessage(message);
+	if(isInitMessage(mVect.at(0)))
+	{
+		//parse message and get id
+		cout << "clientID: " << clientID << " otherID: " << mVect.at(1) << endl;
+		initializeConnection(clientID, mVect);
+		return;
+	}
+	if(cm.connReady())
+	{
+		//update model from message
+		cout << "desrialize" << endl;
+	       
+		cm.updateModel(clientID, cm.deserialize((unsigned char*)message.c_str()));
+	}
+	if(cm.stateReady(clientID))
+	{		
+		//serializing new state
+		Compressed* c = static_cast<Compressed*>(malloc(sizeof(struct Compressed)));
+		
+		cm.moveModel(c);
+		ostringstream os;
+		time(&timev)
+		os << cm.serialize(c) << ":" <<(timev-temp);
+		cm.sendAll(os.str());
+		os.str("");
+		cout << "sendAll\n";
 			
-			cm.moveModel(c);
-			ostringstream os;
-			os << cm.serialize(c);
-			cm.sendAll(os.str());
-			os.str("");
-			cout << "sendAll\n";
-			
-			free(c);
-		}
+		free(c);
+	}
 }
 
 /* called orrnce per select() loop */

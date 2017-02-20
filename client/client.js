@@ -1,8 +1,11 @@
 var clientAddress = "127.0.0.1";
 var clientPort = "21234";
+var calculatedLatency = 0;
+var first = 0;
 
 function Socket(model){
 	console.log("hello");
+	first = Math.floor( Date.now() / 1000 );
 	this.model = model;
 	this.connection = new WebSocket('ws://'+clientAddress+':'+clientPort, ['soap', 'xmpp']);
 	
@@ -17,12 +20,15 @@ function Socket(model){
 	
 	this.sendMessage = function(inc)
 	{
+		first = Math.floor( Date.now() / 1000 );
 		this.connection.send(inc);
 	}
 // Log messages from the server
 	this.connection.onmessage = (e)=> {
 		//this is in scope?
 		var array = e.data.split(":");
+		calculatedLatency = (first-Math.floor( Date.now() / 1000 ))-parseInt(array[1]);
+		document.getElementById("latency").innerHTML = calculatedLatency;
 /* 		if(this.count)
 		{
 		//assumes client 0 based ids
@@ -39,7 +45,7 @@ function Socket(model){
 		}
 		else if(array[0] == "start")
 		{
-			parseInt(array[1]);
+			parseInt(array[1]);//ID
 			getModel().snakeIndex = parseInt(array[2]);
 			window.setTimeout(ControllerTick, 750);
 		}
@@ -49,6 +55,7 @@ function Socket(model){
 			ViewRefresh();
 			window.setTimeout(ControllerTick, 750);
 		}
+		
 		console.log(e.data)
 		//{
 			//deserialize(array);
