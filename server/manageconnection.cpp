@@ -225,7 +225,7 @@ int vectToDir(Tuple vect)
 	}
 	else
 	{
-		return vect.getY() == 1 ? 1 : 3;
+		return vect.getY() == 1 ? 3 : 1;
 	}
 }
 
@@ -257,8 +257,8 @@ void ConnectionManager::moveModel(Compressed* c)
         lose2 = true;
     }*/
 
-	//cout << "head1x: " << head1.getX() << " | " <<this->model.getBoardWidth() << endl;
-	//cout << "head1y: " << head1.getY() << " | " <<this->model.getBoardHeight() << endl;
+	cout << "head1x: " << head1.getX() << " | " <<this->model.getBoardWidth() << endl;
+	cout << "head1y: " << head1.getY() << " | " <<this->model.getBoardHeight() << endl;
     // Out of the board
     if(!(head1.getX() >= 0 && head1.getX() < this->model.getBoardWidth() &&\
 	head1.getY() >= 0 && head1.getY() < this->model.getBoardHeight()))
@@ -267,8 +267,8 @@ void ConnectionManager::moveModel(Compressed* c)
 		lose1 = true;
 	}
     
-	//cout << "head2x: " << head2.getX() << " | " <<this->model.getBoardWidth() << endl;
-	//cout << "head2y: " << head2.getY() << " | " <<this->model.getBoardHeight() << endl;    
+	cout << "head2x: " << head2.getX() << " | " <<this->model.getBoardWidth() << endl;
+	cout << "head2y: " << head2.getY() << " | " <<this->model.getBoardHeight() << endl;    
     if(!(head2.getX() >= 0 && head2.getX() < this->model.getBoardWidth() &&\
 	head2.getY() >= 0 && head2.getY() < this->model.getBoardHeight()))
 	{
@@ -443,7 +443,17 @@ unsigned char* ConnectionManager::serialize(Compressed* c)
 
 int ConnectionManager::deserialize(unsigned char* s)
 {
-	unsigned char c = s[0];
+	//unsigned char c = s[0];		//problem with lower bits, this is only when trying to do one client
+	int c = 0;//s[0];
+	int count = 128;
+	for(int i = 0; i < 8; ++i)
+	{
+		if(s[i] == '1')
+		{
+			c = c + count;
+		}
+		count = count/2;
+	}
 	
 	if(c > 127)
 	{
@@ -456,6 +466,6 @@ int ConnectionManager::deserialize(unsigned char* s)
 	{
 		if(c>63)
 			return 0; // ----- RIGHT
-		return 4; // --------- LEFT
+		return 2; // --------- LEFT
 	}
 }
