@@ -1,5 +1,7 @@
-var clientAddress = "127.0.0.1";
-var clientPort = "21234";
+//var clientAddress = "127.0.0.1";
+//var clientPort = "21234";
+var clientAddress;
+var clientPort;
 var calculatedLatency = 0;
 var first = 0;
 
@@ -7,74 +9,25 @@ function Socket(model){
 	console.log("hello");
 	first = Math.floor( Date.now() / 1000 );
 	this.model = model;
-	this.connection = new WebSocket('ws://'+clientAddress+':'+clientPort, ['soap', 'xmpp']);
+	this.connection = new WebSocket('ws://'+clientAddress+':'+clientPort);//, ['soap', 'xmpp']);
 	
 
-
-// Log errors
-	//this.scoreArray = [0,0];
-	//this.count = 1;
-	this.connection.onerror = function (error) {
-		console.log('WebSocket Error ' + error);
-	};
-	
-	this.sendMessage = function(inc)
-	{
-		first = Math.floor( Date.now() / 1000 );
-		this.connection.send(inc);
-	}
-// Log messages from the server
-	this.connection.onmessage = (e)=> {
-		//this is in scope?
-		var array = e.data.split(":");
-		calculatedLatency = (first-Math.floor( Date.now() / 1000 ))-parseInt(array[1]);
-		document.getElementById("latency").innerHTML = calculatedLatency;
-/* 		if(this.count)
-		{
-		//assumes client 0 based ids
-			var ids = this.model.getIds();
-			
-			console.log("init:"+ids[0]+":"+ids[1]);
-			this.connection.send("init:"+ids[0]+":"+ids[1]);
-		} */
-		if (array[0] == "init")
-		{
-			console.log("init");
-			//array[1] = model.snakeID;
-			this.sendMessage("init:" + model.snakeID);
-		}
-		else if(array[0] == "start")
-		{
-			parseInt(array[1]);//ID
-			getModel().snakeIndex = parseInt(array[2]);
-			window.setTimeout(ControllerTick, 750);
-		}
-		else 
-		{
-			deserialize(array[0]);
-			ViewRefresh();
-			window.setTimeout(ControllerTick, 750);
-		}
-		
-		console.log(e.data)
-		//{
-			//deserialize(array);
-			//sendMessage(serialize(model));
-		//}
-		//this.scoreArray[0] = array[0];
-		//this.scoreArray[1] = array[1];
-		//this.model.setScore(this.scoreArray);
-		this.count =0;
-		ViewRefresh();
-	}
-	
 	this.deserialize = function(s)
 	{
-    var a = s[0];
-    var s1Dir = Vector(1,0);
+    var a = 0;//s[0];
+	var count = 128;
+	for(var i = 0; i < s.length; ++i)
+	{
+		if(s[i] == "1")
+		{
+			a = a + count;
+		}
+		count = count/2;
+	}
+    var s1Dir = new Vector(1,0);
     var s1Bonus = false;
     var s1Loss = false;
-    var s2Dir=Vector(1,0);
+    var s2Dir= new Vector(1,0);
     var s2Bonus=false;
     var s2Loss=false;
     var s1BonusX = 0;
@@ -89,20 +42,20 @@ function Socket(model){
         if(a > 63) // Up
         {
             a-=64;
-            s1Dir = Vector(0,-1);
+            s1Dir = new Vector(0,-1);
         }
         else // Down
-            s1Dir = Vector(0, 1);
+            s1Dir = new Vector(0, 1);
     }
     else
     {
         if(a > 63) // Right
         {
             a-=64;
-            s1Dir = Vector(1,0);
+            s1Dir = new Vector(1,0);
         }
         else // Left
-            s1Dir = Vector(-1, 0);
+            s1Dir = new Vector(-1, 0);
     }
     
     if(a > 31)
@@ -123,20 +76,20 @@ function Socket(model){
         if(a > 3) // Up
         {
             a-=4;
-            s2Dir = Vector(0,-1);
+            s2Dir = new Vector(0,-1);
         }
         else // Down
-            s2Dir = Vector(0, 1);
+            s2Dir = new Vector(0, 1);
     }
     else
     {
         if(a > 3) // Right
         {
             a-=4;
-            s2Dir = Vector(1,0);
+            s2Dir = new Vector(1,0);
         }
         else // Left
-            s2Dir = Vector(-1, 0);
+            s2Dir = new Vector(-1, 0);
     }
     
     if(a > 1)
@@ -200,11 +153,11 @@ function Socket(model){
         getModel().setBonus(bonusToChange,newBonusPos);
     }
     
-    if(lose1 && lose2)
+    if(s1Loss && s2Loss)
         ControllerTie();
-    else if(lose1)
+    else if(s1Loss)
         ControllerWin(2);
-    else if(lose2)
+    else if(s2Loss)
         ControllerWin(1);
 	}
 	
@@ -224,6 +177,62 @@ function Socket(model){
         return 128+32+8+2; // 01 01 01 01
 }
 
-
+// Log errors
+	//this.scoreArray = [0,0];
+	//this.count = 1;
+	this.connection.onerror = function (error) {
+		console.log('WebSocket Error ' + error);
+	};
+	
+	this.sendMessage = function(inc)
+	{
+		first = Math.floor( Date.now() / 1000 );
+		this.connection.send(inc);
+	}
+// Log messages from the server
+	this.connection.onmessage = (e)=> {
+		//this is in scope?
+		var array = e.data.split(":");
+		calculatedLatency = (first-Math.floor( Date.now() / 1000 ))-parseInt(array[1]);
+		document.getElementById("latency").innerHTML = calculatedLatency;
+/* 		if(this.count)
+		{
+		//assumes client 0 based ids
+			var ids = this.model.getIds();
+			
+			console.log("init:"+ids[0]+":"+ids[1]);
+			this.connection.send("init:"+ids[0]+":"+ids[1]);
+		} */
+		if (array[0] == "init")
+		{
+			console.log("init");
+			//array[1] = model.snakeID;
+			this.sendMessage("init:" + model.snakeID);
+		}
+		else if(array[0] == "start")
+		{
+			parseInt(array[1]);//ID
+			getModel().snakeIndex = parseInt(array[2]);
+			window.setTimeout(ControllerTick, 750);
+		}
+		else 
+		{
+			this.deserialize(array[0]);
+			ViewRefresh();
+			window.setTimeout(ControllerTick, 750);
+		}
+		
+		console.log(e.data)
+		//{
+			//deserialize(array);
+			//sendMessage(serialize(model));
+		//}
+		//this.scoreArray[0] = array[0];
+		//this.scoreArray[1] = array[1];
+		//this.model.setScore(this.scoreArray);
+		this.count =0;
+		ViewRefresh();
+	}
+	
 	this.done = ()=>{this.connection.send("DONE")}
 };

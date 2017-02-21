@@ -96,15 +96,18 @@ void ConnectionManager::sendIDs()
 	map<int,int>::iterator a, b;
 	for(a = this->IDs.begin(); a != this->IDs.end(); a++)
 	{
-		for(b = this->IDs.begin(); b != this->IDs.end(); b++)
-		{
-			if(b->first != a->first)
-			{
-				os <<"start:"<< b->second << ":"<<this->clientIDWithConnNum[b->first];
-				this->server->wsSend(a->first, os.str());
-				os.str("");
-			}
-		}
+		//for(b = this->IDs.begin(); b != this->IDs.end(); b++)
+		//{
+		//	if(b->first != a->first)
+		//	{
+		//		os <<"start:"<< b->second << ":"<<this->clientIDWithConnNum[b->first];
+		//		this->server->wsSend(a->first, os.str());
+		//		os.str("");
+		//	}
+		//}
+		os <<"start:"<< a->second << ":"<<this->clientIDWithConnNum[a->first];
+		this->server->wsSend(a->first, os.str());
+		os.str("");
 	}
 }
 
