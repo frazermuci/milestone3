@@ -89,6 +89,9 @@ function ViewStartScreen()
     }
 }
 
+
+
+
 function ViewVectorToTile(vector)
 {
 	return document.getElementById('tile'+(vector.y*getModel().boardWidth+vector.x));
@@ -123,13 +126,11 @@ function ViewGame()
 	for(var i = 0; i < body1.length; i++)
 	{
 		var tile = ViewVectorToTile(body1[i]);
-		console.log(tile);
 		tile.className = (i == 0 ? 'tileHeadA' : 'tileSnakeA');
 	}
 	for(var i = 0; i < body2.length; i++)
 	{
 		var tile = ViewVectorToTile(body2[i]);
-		console.log(tile);
 		tile.className = (i == 0 ? 'tileHeadB' : 'tileSnakeB');
 	}
 	

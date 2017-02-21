@@ -13,6 +13,7 @@ using namespace std;
 
 webSocket server;
 ConnectionManager cm = ConnectionManager(&server, 12, 9);//server is not initialized..well see.
+//ConnectionManager cm = ConnectionManager(&server, 9, 12);
 int count = 0;
 time_t  timev;
 //time(&timev);

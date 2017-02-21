@@ -252,9 +252,11 @@ void ConnectionManager::moveModel(Compressed* c)
     }*/
 
     // Out of the board
-    if(!(head1.getX() >= 0 && head1.getX() < this->model.getBoardWidth() && head1.getY() >= 0 && head1.getY() < this->model.getBoardHeight()))
+    if(!(head1.getX() >= 0 && head1.getX() < this->model.getBoardWidth() &&\
+	head1.getY() >= 0 && head1.getY() < this->model.getBoardHeight()))
         lose1 = true;
-    if(!(head2.getX() >= 0 && head2.getX() < this->model.getBoardWidth() && head2.getY() >= 0 && head2.getY() < this->model.getBoardHeight()))
+    if(!(head2.getX() >= 0 && head2.getX() < this->model.getBoardWidth() &&\
+	head2.getY() >= 0 && head2.getY() < this->model.getBoardHeight()))
         lose2 = true;
 
     // Colliding with other snake

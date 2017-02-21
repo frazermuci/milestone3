@@ -134,10 +134,10 @@ function Socket(model){
         var newBonusPos = Vector(s1BonusX, s1BonusY);
         var snake1Head = getModel().getSnake(0).getHead();
         
-        if(snake1Head.equals(getModel.getBonusPos(0)))
+        if(snake1Head.equals(getModel().bonuses[0]))
             bonusToChange = 0;
         
-        getModel().setBonus(bonusToChange,newBonusPos);
+        getModel().bonuses[bonusToChange] = newBonusPos;
     }
     if(s2Bonus)
     {
@@ -147,10 +147,10 @@ function Socket(model){
         var newBonusPos = Vector(s2BonusX, s2BonusY);
         var snake1Head = getModel().getSnake(0).getHead();
         
-        if(snake1Head.equals(getModel.getBonusPos(0)))
+        if(snake1Head.equals(getModel().bonuses[0]))
             bonusToChange = 0;
         
-        getModel().setBonus(bonusToChange,newBonusPos);
+        getModel().bonuses[bonusToChange] = newBonusPos;
     }
     
     if(s1Loss && s2Loss)
@@ -218,8 +218,9 @@ function Socket(model){
 		else 
 		{
 			this.deserialize(array[0]);
-			ViewRefresh();
+			//ViewRefresh();
 			window.setTimeout(ControllerTick, 750);
+			//ViewRefresh();
 		}
 		
 		console.log(e.data)
