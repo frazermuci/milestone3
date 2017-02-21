@@ -24,6 +24,8 @@ function Socket(model){
 		}
 		count = count/2;
 	}
+	
+	console.log(a);
     var s1Dir = new Vector(1,0);
     var s1Bonus = false;
     var s1Loss = false;
@@ -38,6 +40,7 @@ function Socket(model){
     // s1Dir s1Dir s1Bonus s1Loss s2Dir s2Dir s2Bonus s2Loss
     if(a > 127)
     {
+		console.log("s1Dir if");
         a -= 128;
         if(a > 63) // Up
         {
@@ -49,6 +52,7 @@ function Socket(model){
     }
     else
     {
+		console.log("s1Dir else");
         if(a > 63) // Right
         {
             a-=64;
@@ -67,11 +71,13 @@ function Socket(model){
     if(a > 15)
     {
         a-= 16;
+		console.log("s1Loss");
         s1Loss = true;
     }
     
     if(a > 7)
     {
+		console.log("s2Dir if");
         a -= 8;
         if(a > 3) // Up
         {
@@ -83,6 +89,7 @@ function Socket(model){
     }
     else
     {
+		console.log("s2Dir else");
         if(a > 3) // Right
         {
             a-=4;
@@ -101,6 +108,7 @@ function Socket(model){
     if(a > 0)
     {
         a-= 1;
+		console.log("s2Loss");
         s2Loss = true;
     }
     
