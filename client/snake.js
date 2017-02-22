@@ -147,6 +147,7 @@ function giveChangeDirection(snake)
 {
 	var func = function(v)
 	{
+    console.log("snake.giveChangeDirection.in [" + v.getX() + "]");
 		var xy = convertVectorToArray(v);
 
 		var snakedir = convertVectorToArray(snake.direction);

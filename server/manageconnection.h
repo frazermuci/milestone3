@@ -34,7 +34,6 @@ class ConnectionManager
 	map<int, bool> state;
 	//maps clientID with snakeNumber/ConnectionNumber (i.e. 0 or 1)
 	map<int, int> clientIDWithConnNum;
-	bool gameOn;
 	Compressed c;
 	
 	void handleS1(int ID, Compressed c);
@@ -42,7 +41,6 @@ class ConnectionManager
 	
 	public: 
 		ConnectionManager(webSocket *server, int width, int height);
-		bool isGameOn();
 		void connNumWithClientID(int clientID, int connNum);
 		int getConnNum(int clientID);
 		bool connReady();		

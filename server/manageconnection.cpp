@@ -17,12 +17,6 @@ ConnectionManager::ConnectionManager(webSocket *server, int width, int height)
 	this->state = map<int,bool>();
 	this->model	 = Model(width, height); 
 	this->clientIDWithConnNum = map<int,int>();
-	this->gameOn = true;
-}
-
-bool ConnectionManager::isGameOn()
-{
-	return this->gameOn;
 }
 
 void ConnectionManager::printIDs()
@@ -84,6 +78,7 @@ void ConnectionManager::removeConn(int ID)
 
 void ConnectionManager::send(int clientID, string message)
 {
+  cout << __FUNCTION__ << ": " << "cm.send.Sending [" << message << "]" << endl;
 	this->server->wsSend(clientID, message);
 }
 
@@ -92,7 +87,9 @@ void ConnectionManager::sendAll(string message)
 	map<int, int>::iterator it;
     for (it = this->IDs.begin(); it != this->IDs.end(); it++)
 	{
-		this->server->wsSend(it->first, message);
+    cout << __FUNCTION__ << ": " << "cm.sendAll.Sending [" << message << "] to client [" << it->first << "]" << endl;
+		//this->server->wsSend(it->first, message);
+		this->send(it->first, message);
 	}
 }
 
@@ -102,18 +99,17 @@ void ConnectionManager::sendIDs()
 	map<int,int>::iterator a, b;
 	for(a = this->IDs.begin(); a != this->IDs.end(); a++)
 	{
-		//for(b = this->IDs.begin(); b != this->IDs.end(); b++)
-		//{
-		//	if(b->first != a->first)
-		//	{
-		//		os <<"start:"<< b->second << ":"<<this->clientIDWithConnNum[b->first];
-		//		this->server->wsSend(a->first, os.str());
-		//		os.str("");
-		//	}
-		//}
-		os <<"start:"<< a->second << ":"<<this->clientIDWithConnNum[a->first];
-		this->server->wsSend(a->first, os.str());
-		os.str("");
+		for(b = this->IDs.begin(); b != this->IDs.end(); b++)
+		{
+			if(b->first != a->first)
+			{
+				os <<"start:"<< b->second << ":"<<this->clientIDWithConnNum[b->first];
+        cout << __FUNCTION__ << ": " << "cm.sendIDs.Sending [" << os.str() << "]" << endl;
+				//this->server->wsSend(a->first, os.str());
+				this->send(a->first, os.str());
+				os.str("");
+			}
+		}
 	}
 }
 
@@ -126,6 +122,7 @@ bool ConnectionManager::stateReady(int clientID)
 {
 	this->state[clientID] = true;
 	bool r = ready(this->state);
+  cout << __FUNCTION__ << ": " << "State r [" << r << "]" << endl;
 	if(r)
 	{
 		this->state = map<int,bool>();
@@ -221,11 +218,11 @@ int vectToDir(Tuple vect)
 {
 	if(vect.getX()!= 0)
 	{
-		return vect.getX() == 1 ? 0 : 2;
+		return vect.getX() == 1 ? 4 : 3;
 	}
 	else
 	{
-		return vect.getY() == 1 ? 3 : 1;
+		return vect.getY() == 1 ? 1 : 2;
 	}
 }
 
@@ -257,25 +254,11 @@ void ConnectionManager::moveModel(Compressed* c)
         lose2 = true;
     }*/
 
-	cout << "head1x: " << head1.getX() << " | " <<this->model.getBoardWidth() << endl;
-	cout << "head1y: " << head1.getY() << " | " <<this->model.getBoardHeight() << endl;
     // Out of the board
-    if(!(head1.getX() >= 0 && head1.getX() < this->model.getBoardWidth() &&\
-	head1.getY() >= 0 && head1.getY() < this->model.getBoardHeight()))
-	{
-		cout << "lose1\n\n\n";
-		lose1 = true;
-	}
-    
-	cout << "head2x: " << head2.getX() << " | " <<this->model.getBoardWidth() << endl;
-	cout << "head2y: " << head2.getY() << " | " <<this->model.getBoardHeight() << endl;    
-    if(!(head2.getX() >= 0 && head2.getX() < this->model.getBoardWidth() &&\
-	head2.getY() >= 0 && head2.getY() < this->model.getBoardHeight()))
-	{
-		cout << "lose2\n\n\n";
-		lose2 = true;
-	}
-        
+    if(!(head1.getX() >= 0 && head1.getX() < this->model.getBoardWidth() && head1.getY() >= 0 && head1.getY() < this->model.getBoardHeight()))
+        lose1 = true;
+    if(!(head2.getX() >= 0 && head2.getX() < this->model.getBoardWidth() && head2.getY() >= 0 && head2.getY() < this->model.getBoardHeight()))
+        lose2 = true;
 
     // Colliding with other snake
     for(int i = 0; i < body1.size(); i++)
@@ -308,10 +291,7 @@ void ConnectionManager::moveModel(Compressed* c)
 	c->s1BonusEaten = false;
 	c->s2BonusEaten = false;
 	
-	if(lose1 || lose2)
-	{
-		this->gameOn =false;
-	}
+	
     // Check bonus (head at bonus position)
 	vector<Tuple> bonuses = this->model.getBonuses();
     for(int i = 0; i < bonuses.size(); i++)
@@ -391,81 +371,87 @@ void ConnectionManager::newGame()
 
 unsigned char* ConnectionManager::serialize(Compressed* c)
 {
-    unsigned char* s = static_cast<unsigned char*>(malloc(sizeof(unsigned char)*4));
-    int i = 1;
+    unsigned char* s = static_cast<unsigned char*>(malloc(sizeof(unsigned char)*9));
     
-    s[0] = 0;
-    
-    // s1Dir s1Dir s1Bonus s1Loss s2Dir s2Dir s2Bonus s2Loss
+    // s1Dir s1Loss s1Bonus s2Dir s2Loss s2Bonus
     if(c->s1Direction == 0)    // Right
-        s[0] += 64;// 01 000000
+        s[0] = '0';
     else if(c->s1Direction == 1) // Up
-        s[0] += 128+64;// 11 000000
+        s[0] = '1';
     else if(c->s1Direction == 2) // Left
-        s[0] += 0; // 00 000000
-    else // Down
-        s[0] += 128; // 10 000000
+        s[0] = '2';
+    else // Right
+        s[0] = '3';
     
     if(c->s1Loss)
-        s[0] += 32; // 00 1 00000
+        s[1] = '1';
+    else
+        s[1] = '0';
+
     
     if(c->s1BonusEaten)
     {
-        s[0] += 16; // 000 1 0000
-        s[i] = (c->s1BonusPositionX % 16)*16 + (c->s1BonusPositionY % 16);
-        i++;
+        s[2] = '0' + c->s1BonusPositionX;
+        s[3] = '0' + c->s1BonusPositionY;
     }
-    
-    
+    else
+    {
+        s[2] = 'F'; // only this value is tested. 
+        s[3] = 'F';
+    }
+
     if(c->s2Direction == 0)    // Right
-        s[0] += 4;// 0000 01 00
+        s[4] = '0';
     else if(c->s2Direction == 1) // Up
-        s[0] += 8+4;// 0000 11 00
+        s[4] = '1';
     else if(c->s2Direction == 2) // Left
-        s[0] += 0; // 0000 00 00
+        s[4] = '2';
     else // Down
-        s[0] += 8; // 0000 10 00
+        s[4] = '3';
     
-    if(c->s1Loss)
-        s[0] += 2; // 000000 1 0
+    if(c->s2Loss)
+        s[5] = '1';
+    else
+        s[5] = '0';
     
     if(c->s2BonusEaten)
     {
-        s[0] += 1; // 0000000 1
-        s[i] = (c->s2BonusPositionX % 16)*16 + (c->s2BonusPositionY % 16);
-        i++;
+        s[6] = '0' + c->s2BonusPositionX;
+        s[7] = '0' + c->s2BonusPositionY;
     }
-        
-    s[i] = '\0';
+    else
+    {
+        s[6] = 'F';
+        s[7] = 'F';
+    }
+
+    s[8] = '\0';
     
+    cout << __FUNCTION__ << ": " << s << endl;
     return s;
 }
 
 int ConnectionManager::deserialize(unsigned char* s)
 {
-	//unsigned char c = s[0];		//problem with lower bits, this is only when trying to do one client
-	int c = 0;//s[0];
-	int count = 128;
-	for(int i = 0; i < 8; ++i)
-	{
-		if(s[i] == '1')
-		{
-			c = c + count;
-		}
-		count = count/2;
-	}
+	unsigned char c = s[0];
+  int ret = -1;
 	
 	if(c > 127)
 	{
 		c-=128;
 		if(c>63)
-			return 1; // ----- UP
-		return 3; // --------- DOWN
+			ret = 1; // ----- UP
+    else
+		ret = 3; // --------- DOWN
 	}
 	else
 	{
 		if(c>63)
-			return 0; // ----- RIGHT
-		return 2; // --------- LEFT
+			ret = 0; // ----- RIGHT
+    else
+		ret = 4; // --------- LEFT
 	}
+  cout << __FUNCTION__ << ": return direction [" << ret << "]" << endl;
+  return ret;
 }
+

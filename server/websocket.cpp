@@ -604,10 +604,12 @@ bool webSocket::wsProcessClient(int clientID, char *buffer, int bufferLength){
 
     if (wsClients[clientID]->ReadyState == WS_READY_STATE_OPEN){
         // handshake completed
+//        cout << __FUNCTION__ <<" handshake completed"<<":"<< endl;
         result = wsBuildClientFrame(clientID, buffer, bufferLength);
     }
     else if (wsClients[clientID]->ReadyState == WS_READY_STATE_CONNECTING){
         // handshake not completed
+        cout << __FUNCTION__ <<"handshake not completed"<<":"<< endl;
         result = wsProcessClientHandshake(clientID, buffer);
         if (result){
             if (callOnOpen != NULL)
@@ -617,6 +619,7 @@ bool webSocket::wsProcessClient(int clientID, char *buffer, int bufferLength){
         }
     }
     else {
+        cout << __FUNCTION__ <<"close"<<":"<< endl;
         // ready state is set to closed
         result = false;
     }
@@ -684,6 +687,7 @@ void webSocket::startServer(int port){
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 #endif
 
+    cout << "Starting server" << endl;
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
     if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (const char *)&yes, sizeof(int)) == -1){
         perror("setsockopt() error!");
@@ -709,7 +713,7 @@ void webSocket::startServer(int port){
     while (FD_ISSET(listenfd, &fds)){
         read_fds = fds;
         timeout.tv_sec = 0;
-        timeout.tv_usec = 10000;
+        timeout.tv_usec = 100000;
         if (select(fdmax+1, &read_fds, NULL, NULL, &timeout) > 0){
             for (int i = 0; i <= fdmax; i++){
                 if (FD_ISSET(i, &read_fds)){
@@ -725,12 +729,17 @@ void webSocket::startServer(int port){
                     else {
                         int nbytes = recv(i, buf, sizeof(buf), 0);
                         if (socketIDmap.find(i) != socketIDmap.end()){
-                            if (nbytes < 0)
+                            if (nbytes < 0){
+                                cout << "Closing connexion" << endl;
                                 wsSendClientClose(socketIDmap[i], WS_STATUS_PROTOCOL_ERROR);
-                            else if (nbytes == 0)
+                            }
+                            else if (nbytes == 0){
+                                cout << "Remove Client" << endl;
                                 wsRemoveClient(socketIDmap[i]);
-                            else {
-                                if (!wsProcessClient(socketIDmap[i], buf, nbytes))
+							              }
+							              else {
+ 								              //cout << "ProcessClient" << endl;
+                               if (!wsProcessClient(socketIDmap[i], buf, nbytes))
                                     wsSendClientClose(socketIDmap[i], WS_STATUS_PROTOCOL_ERROR);
                             }
                         }
@@ -750,6 +759,7 @@ void webSocket::startServer(int port){
 }
 
 void webSocket::stopServer(){
+    cout << "Stoping server" << endl;
     for (int i = 0; i < wsClients.size(); i++){
         if (wsClients[i] != NULL){
             if (wsClients[i]->ReadyState != WS_READY_STATE_CONNECTING)
