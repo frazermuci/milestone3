@@ -201,10 +201,12 @@ void ConnectionManager::updateModel(int clientID, int newDir)
 {
 	int ID = this->clientIDWithConnNum[clientID];
 	this->model.changeDirection(ID, dirToVect(newDir));
-	cout << endl << __FUNCTION__ << "vect new dir x: " << dirToVect(newDir).getX() << " y: " << dirToVect(newDir).getY() << endl; 
-	cout << __FUNCTION__ << "new dir; " << newDir << endl << endl;
+	//cout << endl << __FUNCTION__ << "ID " << ID<<" vect new dir x: " << dirToVect(newDir).getX() << " y: " << dirToVect(newDir).getY() << endl; 
+	//cout << __FUNCTION__ << "new dir; " << newDir << endl << endl;
 	Tuple head1 = this->model.getSnake(0)->getHead();
 	Tuple head2 = this->model.getSnake(1)->getHead();
+	Snake s1 = *(this->model.getSnake(1));
+	//cout << __FUNCTION__ << "dirx: "<<s1.getDirection().getX() << endl;
 	//cout << __FUNCTION__ << "head 1 x: " << head1.getX() << " y: "<<head1.getY() << endl;
 	//cout << __FUNCTION__ << "head 2 x: " << head2.getX() << " y: "<<head2.getY() << endl;
 }
@@ -263,8 +265,8 @@ void ConnectionManager::moveModel(Compressed* c)
         lose2 = true;
     }*/
 
-	//cout << "head1x: " << head1.getX() << " | " <<this->model.getBoardWidth() << endl;
-	//cout << "head1y: " << head1.getY() << " | " <<this->model.getBoardHeight() << endl;
+	cout << "head1x: " << head1.getX() << " | " <<this->model.getBoardWidth() << endl;
+	cout << "head1y: " << head1.getY() << " | " <<this->model.getBoardHeight() << endl;
     // Out of the board
     if(!(head1.getX() >= 0 && head1.getX() < this->model.getBoardWidth() &&\
 	head1.getY() >= 0 && head1.getY() < this->model.getBoardHeight()))
@@ -273,8 +275,8 @@ void ConnectionManager::moveModel(Compressed* c)
 		lose1 = true;
 	}
     
-	//cout << "head2x: " << head2.getX() << " | " <<this->model.getBoardWidth() << endl;
-	//cout << "head2y: " << head2.getY() << " | " <<this->model.getBoardHeight() << endl;    
+	cout << "head2x: " << head2.getX() << " | " <<this->model.getBoardWidth() << endl;
+	cout << "head2y: " << head2.getY() << " | " <<this->model.getBoardHeight() << endl;    
     if(!(head2.getX() >= 0 && head2.getX() < this->model.getBoardWidth() &&\
 	head2.getY() >= 0 && head2.getY() < this->model.getBoardHeight()))
 	{

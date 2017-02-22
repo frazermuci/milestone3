@@ -7,7 +7,7 @@ using namespace std;
 class Snake
 {
 	int ID;
-	Tuple* direction;
+	Tuple direction;
 	vector<Tuple> body;
 	int pointerHead;
 	int pointerTail;
