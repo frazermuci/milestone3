@@ -13,6 +13,7 @@ using namespace std;
 
 webSocket server;
 ConnectionManager cm = ConnectionManager(&server, 12, 9);//server is not initialized..well see.
+//ConnectionManager cm = ConnectionManager(&server, 9, 12);
 int count = 0;
 time_t  timev;
 //time(&timev);
@@ -77,19 +78,42 @@ bool isInitMessage(string str)
 void initializeConnection(int clientID, vector<string> mVect)
 {
 	cm.addConn(clientID, atoi(mVect.at(1).c_str()));
-	if(cm.connReady())
-	{
+	//if(cm.connReady())
+	//{
 		cm.newGame();
 		cm.sendIDs();//on client side, wait until "begin"
+	//}
+}
+
+string handleBinaryConversion(int i)
+{
+	ostringstream os;
+	int posVal = 128;
+	//big endian string repr of bits
+	while(posVal >= 1)
+	{
+		if(i >= posVal)
+		{
+			os << "1";
+			i = i-posVal;
+		}
+		else
+		{
+			os << "0";
+		}
+		posVal /=2;
 	}
+	return os.str();
 }
 
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message)
 {
+	if(cm.isGameOn())
+	{
 	time(&timev);
 	time_t temp = timev;
-	cout << message << endl;
+	//cout << message << endl;
 	vector<string> mVect = parseMessage(message);
 	if(isInitMessage(mVect.at(0)))
 	{
@@ -98,32 +122,47 @@ void messageHandler(int clientID, string message)
 		initializeConnection(clientID, mVect);
 		return;
 	}
-	if(cm.connReady())
-	{
+	//if(cm.connReady())
+	//{
 		//update model from message
-		cout << "desrialize" << endl;
+		//cout << "desrialize" << endl;
 	       
 		cm.updateModel(clientID, cm.deserialize((unsigned char*)message.c_str()));
-	}
-	if(cm.stateReady(clientID))
-	{		
+	//}
+	//if(cm.stateReady(clientID))
+	//{		
 		//serializing new state
 		Compressed* c = static_cast<Compressed*>(malloc(sizeof(struct Compressed)));
 		
 		cm.moveModel(c);
 		ostringstream os;
-		time(&timev)
-		os << cm.serialize(c) << ":" <<(timev-temp);
-		cm.sendAll(os.str());
+		time(&timev);		
+		
+		string st = handleBinaryConversion(cm.serialize(c)[0]);
+		int ye = 0;
+		int p = 128;
+		for(int i = 0; i < st.size(); ++i)
+		{
+			if(st[i] != '0')
+			{
+				ye += p;
+			}
+			p /=2;
+		}
+		cout << "atoi" << ye << endl;
+		os << handleBinaryConversion(cm.serialize(c)[0]) << ":" <<(timev-temp);
+		cout << os.str() << endl;
+		cm.sendAll(os.str().c_str());
 		os.str("");
 		cout << "sendAll\n";
 			
 		free(c);
+	//}
 	}
 }
 
 /* called orrnce per select() loop */
-void periodicHandler(){
+/*void periodicHandler(){
     static time_t next = time(NULL) + 10;
     time_t current = time(NULL);
     if (current >= next){
@@ -138,7 +177,7 @@ void periodicHandler(){
 
         next = time(NULL) + 10;
     }
-}
+}*/
 
 int main(int argc, char *argv[]){
     int port  = 21234;

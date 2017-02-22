@@ -89,6 +89,9 @@ function ViewStartScreen()
     }
 }
 
+
+
+
 function ViewVectorToTile(vector)
 {
 	return document.getElementById('tile'+(vector.y*getModel().boardWidth+vector.x));

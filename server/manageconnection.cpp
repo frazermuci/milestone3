@@ -17,6 +17,12 @@ ConnectionManager::ConnectionManager(webSocket *server, int width, int height)
 	this->state = map<int,bool>();
 	this->model	 = Model(width, height); 
 	this->clientIDWithConnNum = map<int,int>();
+	this->gameOn = true;
+}
+
+bool ConnectionManager::isGameOn()
+{
+	return this->gameOn;
 }
 
 void ConnectionManager::printIDs()
@@ -96,15 +102,18 @@ void ConnectionManager::sendIDs()
 	map<int,int>::iterator a, b;
 	for(a = this->IDs.begin(); a != this->IDs.end(); a++)
 	{
-		for(b = this->IDs.begin(); b != this->IDs.end(); b++)
-		{
-			if(b->first != a->first)
-			{
-				os <<"start:"<< b->second << ":"<<this->clientIDWithConnNum[b->first];
-				this->server->wsSend(a->first, os.str());
-				os.str("");
-			}
-		}
+		//for(b = this->IDs.begin(); b != this->IDs.end(); b++)
+		//{
+		//	if(b->first != a->first)
+		//	{
+		//		os <<"start:"<< b->second << ":"<<this->clientIDWithConnNum[b->first];
+		//		this->server->wsSend(a->first, os.str());
+		//		os.str("");
+		//	}
+		//}
+		os <<"start:"<< a->second << ":"<<this->clientIDWithConnNum[a->first];
+		this->server->wsSend(a->first, os.str());
+		os.str("");
 	}
 }
 
@@ -212,11 +221,11 @@ int vectToDir(Tuple vect)
 {
 	if(vect.getX()!= 0)
 	{
-		return vect.getX() == 1 ? 4 : 3;
+		return vect.getX() == 1 ? 0 : 2;
 	}
 	else
 	{
-		return vect.getY() == 1 ? 1 : 2;
+		return vect.getY() == 1 ? 1 : 3;
 	}
 }
 
@@ -248,11 +257,25 @@ void ConnectionManager::moveModel(Compressed* c)
         lose2 = true;
     }*/
 
+	//cout << "head1x: " << head1.getX() << " | " <<this->model.getBoardWidth() << endl;
+	//cout << "head1y: " << head1.getY() << " | " <<this->model.getBoardHeight() << endl;
     // Out of the board
-    if(!(head1.getX() >= 0 && head1.getX() < this->model.getBoardWidth() && head1.getY() >= 0 && head1.getY() < this->model.getBoardHeight()))
-        lose1 = true;
-    if(!(head2.getX() >= 0 && head2.getX() < this->model.getBoardWidth() && head2.getY() >= 0 && head2.getY() < this->model.getBoardHeight()))
-        lose2 = true;
+    if(!(head1.getX() >= 0 && head1.getX() < this->model.getBoardWidth() &&\
+	head1.getY() >= 0 && head1.getY() < this->model.getBoardHeight()))
+	{
+		cout << "lose1\n\n\n";
+		lose1 = true;
+	}
+    
+	//cout << "head2x: " << head2.getX() << " | " <<this->model.getBoardWidth() << endl;
+	//cout << "head2y: " << head2.getY() << " | " <<this->model.getBoardHeight() << endl;    
+    if(!(head2.getX() >= 0 && head2.getX() < this->model.getBoardWidth() &&\
+	head2.getY() >= 0 && head2.getY() < this->model.getBoardHeight()))
+	{
+		cout << "lose2\n\n\n";
+		lose2 = true;
+	}
+        
 
     // Colliding with other snake
     for(int i = 0; i < body1.size(); i++)
@@ -285,7 +308,10 @@ void ConnectionManager::moveModel(Compressed* c)
 	c->s1BonusEaten = false;
 	c->s2BonusEaten = false;
 	
-	
+	if(lose1 || lose2)
+	{
+		this->gameOn =false;
+	}
     // Check bonus (head at bonus position)
 	vector<Tuple> bonuses = this->model.getBonuses();
     for(int i = 0; i < bonuses.size(); i++)
@@ -377,7 +403,7 @@ unsigned char* ConnectionManager::serialize(Compressed* c)
         s[0] += 128+64;// 11 000000
     else if(c->s1Direction == 2) // Left
         s[0] += 0; // 00 000000
-    else // Right
+    else // Down
         s[0] += 128; // 10 000000
     
     if(c->s1Loss)
