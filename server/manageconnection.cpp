@@ -201,6 +201,12 @@ void ConnectionManager::updateModel(int clientID, int newDir)
 {
 	int ID = this->clientIDWithConnNum[clientID];
 	this->model.changeDirection(ID, dirToVect(newDir));
+	cout << endl << __FUNCTION__ << "vect new dir x: " << dirToVect(newDir).getX() << " y: " << dirToVect(newDir).getY() << endl; 
+	cout << __FUNCTION__ << "new dir; " << newDir << endl << endl;
+	Tuple head1 = this->model.getSnake(0)->getHead();
+	Tuple head2 = this->model.getSnake(1)->getHead();
+	//cout << __FUNCTION__ << "head 1 x: " << head1.getX() << " y: "<<head1.getY() << endl;
+	//cout << __FUNCTION__ << "head 2 x: " << head2.getX() << " y: "<<head2.getY() << endl;
 }
 
 void ConnectionManager::addSnake(int clientID, int x, int y, Tuple direction)
@@ -456,6 +462,6 @@ int ConnectionManager::deserialize(unsigned char* s)
 	{
 		if(c>63)
 			return 0; // ----- RIGHT
-		return 4; // --------- LEFT
+		return 2; // --------- LEFT
 	}
 }

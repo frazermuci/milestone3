@@ -203,8 +203,10 @@ void Model::move()
 
 void Model::newGame()
 {
+		cout << __FUNCTION__ << "x: " << this->getSnake(1)->getDirection().getX() << " y: "<<this->getSnake(1)->getDirection().getY() << endl;
 		this->getSnake(0)->resetSnake(2,2,Tuple(1,0));
 		this->getSnake(1)->resetSnake(9,7, Tuple(-1,0));
 		this->bonuses[0] =  Tuple(7,2);
 		this->bonuses[1] = Tuple(4,7);
+		cout << __FUNCTION__ << "x: " << this->getSnake(1)->getDirection().getX() << " y: "<<this->getSnake(1)->getDirection().getY() << endl;
 }

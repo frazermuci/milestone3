@@ -1,5 +1,6 @@
 //snake
 #include <vector>
+#include <iostream>
 #include "tuple.h"
 #include "snake.h"
 using namespace std;
@@ -8,7 +9,7 @@ Snake::Snake()
 
 Snake::Snake(int x, int y, Tuple direction, int ID)
 {
-	this->direction = direction;
+	this->direction = new Tuple(direction.getX(), direction.getY());
 	this->ID = ID;
 	this->body = vector<Tuple>();
 	this->body.push_back(Tuple(x,y));
@@ -40,15 +41,18 @@ bool checkOppo(Tuple v1, Tuple v2)
 
 void Snake::changeDirection(Tuple v)
 {
-	if(!checkOppo(v, this->direction))
+	if(!checkOppo(v, *(this->direction)))
 	{
-		this->direction = v;
+		delete this->direction;
+		this->direction = new Tuple(v.getX(), v.getY());
 	}
+	cout << __FUNCTION__ << "x: " << this->direction->getX()<< " y: "<<this->direction->getY() << endl;
+	
 }
 
 Tuple Snake::getDirection()
 {
-	return this->direction;
+	return *(this->direction);
 }
 
 void Snake::move()
@@ -59,7 +63,7 @@ void Snake::move()
 		this->body.at(i).setX(this->body.at(i-1).getX());
 		this->body.at(i).setY(this->body.at(i-1).getY());
 	}
-	this->body.at(0)=head.add(this->direction);//review
+	this->body.at(0)=head.add(*(this->direction));//review
 }
 
 int Snake::getID()
@@ -69,11 +73,13 @@ int Snake::getID()
 
 void Snake::resetSnake(int x, int y, Tuple dir)
 {
+	cout << __FUNCTION__ << "x: " << this->direction->getX()<< " y: "<<this->direction->getY() << endl;
 	this->body.at(0) = Tuple(x,y);
 	this->changeDirection(dir);
 	this->pointerHead = 0;
 	this->pointerTail = 0;
 	this->length = 3;
+	cout << __FUNCTION__ << "x: " << this->direction->getX() << " y: "<<this->direction->getY() << endl;
 }
 
 int Snake::getRealLength()
