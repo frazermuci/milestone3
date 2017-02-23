@@ -28,9 +28,9 @@
 
 using namespace std;
 
-void showAvailableIP(){
+void showAvailableIP(){;
 
-#ifdef __linux__
+/*
 
     char name[INET_ADDRSTRLEN];
     struct ifaddrs *iflist;
@@ -53,13 +53,13 @@ void showAvailableIP(){
 
 #elif _WIN32
     
-    /* Variables used by GetIpAddrTable */
+    // Variables used by GetIpAddrTable 
     PMIB_IPADDRTABLE pIPAddrTable;
     DWORD dwSize = 0;
     DWORD dwRetVal = 0;
     IN_ADDR IPAddr;
 
-    /* Variables used to return error message */
+    // Variables used to return error message 
     LPVOID lpMsgBuf;
 
     // Before calling AddIPAddress we use GetIpAddrTable to get
@@ -104,7 +104,7 @@ void showAvailableIP(){
         pIPAddrTable = NULL;
     }
 
-#endif
+#endif*/
 }
 
 vector<int> webSocket::getClientIDs(){

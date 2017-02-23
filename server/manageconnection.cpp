@@ -289,25 +289,33 @@ void ConnectionManager::moveModel(Compressed* c)
     for(int i = 0; i < body1.size(); i++)
     {
         if(head2 == body1[i])
-            lose2=true;
-    }
+        { 
+			lose2=true;
+		}
+	}
     for(int i = 0; i < body2.size(); i++)
     {
         if(head1 == body2[i])
-            lose1=true;
-    }
+        { 
+			lose1=true;
+		}
+	}
 
     // Colliding with yourself
     for(int i = 1; i < body1.size(); i++)
     {
         if(head1 == body1[i])
+		{
             lose1=true;
+		}
     }
     for(int i = 1; i < body2.size(); i++)
     {
         if(head2 == body2[i])
+		{
             lose2=true;
-    }
+		}
+	}
 	
 	c->s1Direction = vectToDir(snake1->getDirection());
 	c->s2Direction = vectToDir(snake2->getDirection());

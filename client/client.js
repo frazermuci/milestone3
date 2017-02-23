@@ -6,7 +6,6 @@ var calculatedLatency = 0;
 var first = 0;
 
 function Socket(model){
-	console.log("hello");
 	first = Math.floor( Date.now() / 1000 );
 	this.model = model;
 	this.connection = new WebSocket('ws://'+clientAddress+':'+clientPort);//, ['soap', 'xmpp']);
@@ -26,6 +25,7 @@ function Socket(model){
 	}
 	
 	console.log(a);
+	console.log(s)
     var s1Dir = new Vector(1,0);
     var s1Bonus = false;
     var s1Loss = false;
@@ -40,7 +40,6 @@ function Socket(model){
     // s1Dir s1Dir s1Bonus s1Loss s2Dir s2Dir s2Bonus s2Loss
     if(a > 127)
     {
-		console.log("s1Dir if");
         a -= 128;
         if(a > 63) // Up
         {
@@ -52,10 +51,10 @@ function Socket(model){
     }
     else
     {
-		console.log("s1Dir else");
         if(a > 63) // Right
         {
-            a-=64;
+            a-=64;			
+			console.log(a)
             s1Dir = new Vector(1,0);
         }
         else // Left
@@ -65,19 +64,19 @@ function Socket(model){
     if(a > 31)
     {
         a-= 32;
-        s1Bonus = true;
+        //s1Bonus = true;
+		s1Loss = true;
     }
     
     if(a > 15)
     {
         a-= 16;
-		console.log("s1Loss");
-        s1Loss = true;
+       // s1Loss = true;
+		//console.log("s1Loss")
     }
     
     if(a > 7)
     {
-		console.log("s2Dir if");
         a -= 8;
         if(a > 3) // Up
         {
@@ -89,7 +88,6 @@ function Socket(model){
     }
     else
     {
-		console.log("s2Dir else");
         if(a > 3) // Right
         {
             a-=4;
@@ -102,14 +100,15 @@ function Socket(model){
     if(a > 1)
     {
         a-= 2;
-        s2Bonus = true;
+        //s2Bonus = true;
+		s2Loss = true;
     }
     
     if(a > 0)
     {
         a-= 1;
-		console.log("s2Loss");
-        s2Loss = true;
+        //s2Loss = true;
+		//console.log("s2Loss")
     }
     
     var i = 1;
@@ -139,7 +138,7 @@ function Socket(model){
         getModel().getSnake(0).eatBonus();
         
         var bonusToChange = 1;
-        var newBonusPos = Vector(s1BonusX, s1BonusY);
+        var newBonusPos = new Vector(s1BonusX, s1BonusY);
         var snake1Head = getModel().getSnake(0).getHead();
         
         if(snake1Head.equals(getModel().bonuses[0]))
@@ -152,8 +151,8 @@ function Socket(model){
         getModel().getSnake(1).eatBonus();
         
         var bonusToChange = 1;
-        var newBonusPos = Vector(s2BonusX, s2BonusY);
-        var snake1Head = getModel().getSnake(0).getHead();
+        var newBonusPos = new Vector(s2BonusX, s2BonusY);
+        var snake1Head = getModel().getSnake(1).getHead();
         
         if(snake1Head.equals(getModel().bonuses[0]))
             bonusToChange = 0;
@@ -162,7 +161,10 @@ function Socket(model){
     }
     
     if(s1Loss && s2Loss)
-        ControllerTie();
+	{
+		console.log("heloo")
+		ControllerTie();
+	}
     else if(s1Loss)
         ControllerWin(2);
     else if(s2Loss)
@@ -200,7 +202,9 @@ function Socket(model){
 // Log messages from the server
 	this.connection.onmessage = (e)=> {
 		//this is in scope?
+		console.log("e.data " + e.data)
 		var array = e.data.split(":");
+		console.log(array)
 		calculatedLatency = (first-Math.floor( Date.now() / 1000 ))-parseInt(array[1]);
 		document.getElementById("latency").innerHTML = calculatedLatency;
 /* 		if(this.count)
@@ -225,13 +229,23 @@ function Socket(model){
 		}
 		else 
 		{
+			console.log("array: " + array[0])
 			this.deserialize(array[0]);
+			var s1 = getModel().snakes[1];
+			console.log("Snake 1: \n")
+			console.log(s1.getBody()[0].x)
+			console.log(s1.getBody()[0].y)
+			console.log("\n")
+			console.log("Snake 2: \n")
+			console.log(s1.getBody()[1].x)
+			console.log(s1.getBody()[1].y)
+			console.log("\n")
 			//ViewRefresh();
 			window.setTimeout(ControllerTick, 750);
 			//ViewRefresh();
 		}
 		
-		console.log(e.data)
+		//console.log(e.data)
 		//{
 			//deserialize(array);
 			//sendMessage(serialize(model));
@@ -242,6 +256,5 @@ function Socket(model){
 		this.count =0;
 		ViewRefresh();
 	}
-	
 	this.done = ()=>{this.connection.send("DONE")}
 };
