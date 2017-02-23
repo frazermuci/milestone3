@@ -64,7 +64,6 @@ function Socket(model){
     if(a > 31)
     {
         a-= 32;
-        //s1Bonus = true;
 		s1Loss = true;
     }
     
@@ -72,8 +71,6 @@ function Socket(model){
     {
         a-= 16;
 		s1Bonus = true;
-       // s1Loss = true;
-		//console.log("s1Loss")
     }
     
     if(a > 7)

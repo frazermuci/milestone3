@@ -78,11 +78,11 @@ bool isInitMessage(string str)
 void initializeConnection(int clientID, vector<string> mVect)
 {
 	cm.addConn(clientID, atoi(mVect.at(1).c_str()));
-	//if(cm.connReady())
-	//{
+	if(cm.connReady())
+	{
 		cm.newGame();
 		cm.sendIDs();//on client side, wait until "begin"
-	//}
+	}
 }
 
 string handleBinaryConversion(int i)
@@ -122,15 +122,15 @@ void messageHandler(int clientID, string message)
 		initializeConnection(clientID, mVect);
 		return;
 	}
-	//if(cm.connReady())
-	//{
+	if(cm.connReady())
+	{
 		//update model from message
 		//cout << "desrialize" << endl;
 	       
 		cm.updateModel(clientID, cm.deserialize((unsigned char*)message.c_str()));
-	//}
-	//if(cm.stateReady(clientID))
-	//{		
+	}
+	if(cm.stateReady(clientID))
+	{		
 		//serializing new state
 		Compressed* c = static_cast<Compressed*>(malloc(sizeof(struct Compressed)));
 		
@@ -147,7 +147,7 @@ void messageHandler(int clientID, string message)
 		cout << "sendAll\n";
 			
 		free(c);
-	//}
+	}
 	}
 }
 
