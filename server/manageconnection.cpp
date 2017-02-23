@@ -102,15 +102,6 @@ void ConnectionManager::sendIDs()
 	map<int,int>::iterator a, b;
 	for(a = this->IDs.begin(); a != this->IDs.end(); a++)
 	{
-		//for(b = this->IDs.begin(); b != this->IDs.end(); b++)
-		//{
-		//	if(b->first != a->first)
-		//	{
-		//		os <<"start:"<< b->second << ":"<<this->clientIDWithConnNum[b->first];
-		//		this->server->wsSend(a->first, os.str());
-		//		os.str("");
-		//	}
-		//}
 		os <<"start:"<< a->second << ":"<<this->clientIDWithConnNum[a->first];
 		this->server->wsSend(a->first, os.str());
 		os.str("");
@@ -260,20 +251,13 @@ void ConnectionManager::moveModel(Compressed* c)
     bool lose1 = false;
     bool lose2 = false;
 
-    // Heads colliding
-    /*if(head1.equals(head2))
-    {
-        lose1 = true;
-        lose2 = true;
-    }*/
-
 	//cout << "head1x: " << head1.getX() << " | " <<this->model.getBoardWidth() << endl;
 	//cout << "head1y: " << head1.getY() << " | " <<this->model.getBoardHeight() << endl;
     // Out of the board
     if(!(head1.getX() >= 0 && head1.getX() < this->model.getBoardWidth() &&\
 	head1.getY() >= 0 && head1.getY() < this->model.getBoardHeight()))
 	{
-		//cout << "lose1\n\n\n";
+		cout << "lose1\n";
 		lose1 = true;
 	}
     
@@ -282,7 +266,7 @@ void ConnectionManager::moveModel(Compressed* c)
     if(!(head2.getX() >= 0 && head2.getX() < this->model.getBoardWidth() &&\
 	head2.getY() >= 0 && head2.getY() < this->model.getBoardHeight()))
 	{
-		//cout << "lose2\n\n\n";
+		cout << "lose2\n";
 		lose2 = true;
 	}
         
@@ -292,6 +276,7 @@ void ConnectionManager::moveModel(Compressed* c)
     {
         if(head2 == body1[i])
         { 
+			cout << "lose2\n";
 			lose2=true;
 		}
 	}
@@ -299,6 +284,7 @@ void ConnectionManager::moveModel(Compressed* c)
     {
         if(head1 == body2[i])
         { 
+			cout << "lose1\n";
 			lose1=true;
 		}
 	}
@@ -308,6 +294,7 @@ void ConnectionManager::moveModel(Compressed* c)
     {
         if(head1 == body1[i])
 		{
+			cout << "lose1\n";
             lose1=true;
 		}
     }
@@ -315,6 +302,7 @@ void ConnectionManager::moveModel(Compressed* c)
     {
         if(head2 == body2[i])
 		{
+			cout << "lose2\n";
             lose2=true;
 		}
 	}
@@ -351,61 +339,13 @@ void ConnectionManager::moveModel(Compressed* c)
 			c->s2BonusPositionY = newB.getY();
 		}
 	}
-	
-	//c->s1Dir = 
-	
-	/*
-	map<int, int>::iterator it;
-	for(it = this->IDs.begin(); it != this->IDs.end(); ++it)
-	{
-		cout << "connNum: " << this->clientIDWithConnNum[it->first] << endl;
-		this->model.growSnake(this->clientIDWithConnNum[it->first]);
-	}*/
 }
 
 void ConnectionManager::newGame()
 {
 	this->model.newGame();
-	//this->model.isRunning = 1;
 }
 
-/*int findClientByConnNum(int connNum)
-{
-	for(auto it = this->clientIDWithConnNum.begin(); it!=this->clientIDWithConnNum.end();++it)
-	{
-		if(it->second == connNum)
-		{
-			return it->first;
-		}
-	}
-}*/
-
-/*Compressed ConnectionManager::compressModel()
-{
-	return this->model.c;
-	//int client0 = findClientByConnNum(0);
-	//int client1 = findClientByConnNum(1);
-	Compressed c = 
-	{
-		//int s1Direction; //1 = UP, 2 = DOWN, 3 = LEFT, 4 = RIGHT
-		//bool s1BonusEaten;
-		//bool s1Loss;
-		//int s1BonusPositionX;
-		//int s1BonusPositionY;
-		//vectToDir(this->model.getSnake(this->IDs[client0]).getDirection()),
-		this->model.c.s1Direction
-		this->model.c.s1BonusEaten,
-		this->model.c.s1Loss,
-		this->model.c.s1BonusPositionX,
-		this->model,
-		vectToDir(this->model.getSnake(this->IDs[client0]).getDirection()),
-		,
-		,
-		,
-		,
-	};
-	//return c;
-}*/
 
 unsigned char* ConnectionManager::serialize(Compressed* c)
 {
@@ -444,7 +384,7 @@ unsigned char* ConnectionManager::serialize(Compressed* c)
     else // Down
         s[0] += 8; // 0000 10 00
     
-    if(c->s1Loss)
+    if(c->s2Loss)
         s[0] += 2; // 000000 1 0
     
     if(c->s2BonusEaten)

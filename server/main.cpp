@@ -109,7 +109,7 @@ string handleBinaryConversion(int i)
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message)
 {
-	cout << endl <<  message << endl << endl;
+	//cout << endl <<  message << endl << endl;
 	if(cm.isGameOn())
 	{
 	time(&timev);
@@ -143,7 +143,7 @@ void messageHandler(int clientID, string message)
 		string bonusPos1 = handleBinaryConversion(cm.serialize(c)[1]);
 		string bonusPos2 = handleBinaryConversion(cm.serialize(c)[2]);
 		os << st << ":" << bonusPos1 << ":" << bonusPos2 << ":" << (timev-temp);
-		//cout << os.str() << endl;
+		cout << os.str() << endl;
 		cm.sendAll(os.str().c_str());
 		os.str("");
 		cout << "sendAll\n";
