@@ -175,7 +175,7 @@ Tuple Model::makeBonus(int bpos)
 			y = y*-1;
 		}
 	}
-	cout << "x: "<< x << "   y: " << y << endl;
+	//cout << "x: "<< x << "   y: " << y << endl;
 	this->bonuses.at(bpos) = Tuple(x,y);
 }
 

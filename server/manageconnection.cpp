@@ -200,14 +200,14 @@ void ConnectionManager::handleS2(int ID, Compressed c)
 void ConnectionManager::updateModel(int clientID, int newDir)
 {
 	int ID = this->clientIDWithConnNum[clientID];
-	cout << endl << __FUNCTION__ << "ID: "<<ID<< " new Direction in: " << newDir << endl;  
+	//cout << endl << __FUNCTION__ << "ID: "<<ID<< " new Direction in: " << newDir << endl;  
 	this->model.changeDirection(ID, dirToVect(newDir));
 	//cout << endl << __FUNCTION__ << "ID " << ID<<" vect new dir x: " << dirToVect(newDir).getX() << " y: " << dirToVect(newDir).getY() << endl; 
 	//cout << __FUNCTION__ << "new dir; " << newDir << endl << endl;
 	//Tuple head1 = this->model.getSnake(0)->getHead();
 	//Tuple head2 = this->model.getSnake(1)->getHead();
-	Snake s1 = *(this->model.getSnake(ID));
-	cout << __FUNCTION__ <<" NEW DIRECTION: x: " << s1.getDirection().getX() << "y: " << s1.getDirection().getY() << endl;
+	//Snake s1 = *(this->model.getSnake(ID));
+	//cout << __FUNCTION__ <<" NEW DIRECTION: x: " << s1.getDirection().getX() << "y: " << s1.getDirection().getY() << endl;
 	//cout << __FUNCTION__ << "dirx: "<<s1.getDirection().getX() << endl;
 	//cout << __FUNCTION__ << "head 1 x: " << head1.getX() << " y: "<<head1.getY() << endl;
 	//cout << __FUNCTION__ << "head 2 x: " << head2.getX() << " y: "<<head2.getY() << endl;
@@ -273,7 +273,7 @@ void ConnectionManager::moveModel(Compressed* c)
     if(!(head1.getX() >= 0 && head1.getX() < this->model.getBoardWidth() &&\
 	head1.getY() >= 0 && head1.getY() < this->model.getBoardHeight()))
 	{
-		cout << "lose1\n\n\n";
+		//cout << "lose1\n\n\n";
 		lose1 = true;
 	}
     
@@ -282,7 +282,7 @@ void ConnectionManager::moveModel(Compressed* c)
     if(!(head2.getX() >= 0 && head2.getX() < this->model.getBoardWidth() &&\
 	head2.getY() >= 0 && head2.getY() < this->model.getBoardHeight()))
 	{
-		cout << "lose2\n\n\n";
+		//cout << "lose2\n\n\n";
 		lose2 = true;
 	}
         

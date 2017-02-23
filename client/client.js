@@ -106,7 +106,6 @@ function Socket(model){
 		if(a > 1)
 		{
 			a-= 2;
-			//s2Bonus = true;
 			s2Loss = true;
 		}
     
@@ -114,8 +113,6 @@ function Socket(model){
 		{
 			a-= 1;
 			s2Bonus = true;
-			//s2Loss = true;
-			//console.log("s2Loss")
 		}
     
 		var i = 1;
@@ -142,6 +139,7 @@ function Socket(model){
 		}
 		else
 		{
+			console.log(getModel().snakeIndex)
 			getModel().changeDirection(1, s2Dir);
 		}
 		
@@ -218,17 +216,9 @@ function Socket(model){
 		var array = e.data.split(":");
 		calculatedLatency = (first-Math.floor( Date.now() / 1000 ))-parseInt(array[3]);
 		document.getElementById("latency").innerHTML = calculatedLatency;
-/* 		if(this.count)
-		{
-		//assumes client 0 based ids
-			var ids = this.model.getIds();
-			
-			console.log("init:"+ids[0]+":"+ids[1]);
-			this.connection.send("init:"+ids[0]+":"+ids[1]);
-		} */
+
 		if (array[0] == "init")
 		{
-			//array[1] = model.snakeID;
 			this.sendMessage("init:" + model.snakeID);
 		}
 		else if(array[0] == "start")
@@ -245,14 +235,6 @@ function Socket(model){
 			//ViewRefresh();
 		}
 		
-		//console.log(e.data)
-		//{
-			//deserialize(array);
-			//sendMessage(serialize(model));
-		//}
-		//this.scoreArray[0] = array[0];
-		//this.scoreArray[1] = array[1];
-		//this.model.setScore(this.scoreArray);
 		this.count =0;
 		ViewRefresh();
 	}

@@ -122,7 +122,7 @@ function ViewGame()
     var body1 = snake1.getBody();
     var body2 = snake2.getBody();
 	
-	//console.log(body1);
+	
 	for(var i = 0; i < body1.length; i++)
 	{
 		var tile = ViewVectorToTile(body1[i]);
@@ -135,7 +135,7 @@ function ViewGame()
 	}
 	
 	var bonuses = getModel().getBonuses();
-	//console.log(bonuses);
+	
 	for(var i = 0; i < bonuses.length; i++)
 	{
 		var tile = ViewVectorToTile(bonuses[i]);

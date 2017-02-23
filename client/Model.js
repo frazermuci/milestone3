@@ -86,7 +86,6 @@ function genGrowSnake(model) // adds new body part
 	{
 		var s = model.getSnake(ID);
 		var nP = s.getHead().add(s.getDirection());
-		//console.log(s.getHead());
 		s.addBody(nP);
 	}
 	return func;
@@ -97,13 +96,9 @@ function genGetChangeDirection(model) //changes direction of snake associated wi
 	function func(ID,direction)
 	{
 		snake = model.getSnake(ID);
-		if(direction.x == 0){
-		console.log("direction x: ")
-		console.log(direction.x)
-		console.log(model.getSnake(ID).direction.x)
-		}
+		
 		snake.changeDirection(direction);
-		//console.log(ID)
+	
 	}
 	return func;
 }

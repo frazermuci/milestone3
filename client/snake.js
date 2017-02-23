@@ -10,13 +10,9 @@ function Snake(x, y, direction, ID)
 	this.getDirection = () => {
 		return this.direction;
 	}
-	//this.addBody = giveAddBody(this);
 	this.move = giveMove(this);
-	//this.getBody = ()=>{return this.body};
 	this.getID = ()=>{return this.ID}
 	this.resetSnake = (xPos,yPos,dir)=>{
-		//this.body = genBodyList(x,y,direction);
-		//console.log(dir);
 		this.body[0] = new Vector(xPos,yPos);
 		this.changeDirection(dir);
 		this.pointerHead = 0;
@@ -48,7 +44,6 @@ function Snake(x, y, direction, ID)
 		return bod;
 	}
 	this.addBody = (vector) => {
-		//console.log(vector);
 		if(this.getRealLength() >= this.length)
 		{
 			this.pointerTail = (this.pointerTail+1)%this.maxLength;
