@@ -10,6 +10,7 @@ Model::Model()
 
 Model::Model(int boardWidth, int boardHeight)
 {
+	srand(time(NULL));
 	this->snakes = map<int, Snake*>();	
 	this->bonuses = vector<Tuple>();
 	//this->score = vector<int>();
@@ -113,7 +114,11 @@ void Model::changeDirection(int ID, Tuple dir)
 
 vector<Tuple> Model::getBonuses()
 {
-	return this->bonuses;
+	//return this->bonuses;
+	vector<Tuple> retList = vector<Tuple>();
+	retList.push_back(this->bonuses.at(0));
+	retList.push_back(this->bonuses.at(1));
+	return retList;
 }
 
 bool objectInTheWay(Model m, int x, int y)
@@ -144,8 +149,9 @@ bool objectInTheWay(Model m, int x, int y)
 	
 Tuple Model::makeBonus(int bpos)
 {
-		int x = static_cast<int>(floor(rand()))%  this->boardWidth;
-	int y = static_cast<int>(floor(rand()))% this->boardHeight;
+	int x = static_cast<int>(floor(rand() *  this->boardWidth)) % this->boardWidth;
+	int y = static_cast<int>(floor(rand() * this->boardHeight)) % this->boardHeight;
+	
 	if(x < 0)
 	{
 		x = x*-1;
@@ -156,8 +162,8 @@ Tuple Model::makeBonus(int bpos)
 	}
 	while(objectInTheWay(*this,x,y))
 	{
-		x = static_cast<int>(floor(rand()))% this->boardWidth;
-		y = static_cast<int>(floor(rand()))%this->boardHeight;
+		x = static_cast<int>(floor(rand() *  this->boardWidth)) % this->boardWidth;
+		y = static_cast<int>(floor(rand() * this->boardHeight)) % this->boardHeight;
 		if(x < 0)
 		{
 			x = x*-1;
@@ -167,8 +173,8 @@ Tuple Model::makeBonus(int bpos)
 			y = y*-1;
 		}
 	}
+	cout << "x: "<< x << "   y: " << y << endl;
 	this->bonuses.at(bpos) = Tuple(x,y);
-	return Tuple(x,y);
 }
 
 int Model::getBoardWidth()
@@ -206,7 +212,8 @@ void Model::newGame()
 		//cout << __FUNCTION__ << "x: " << this->getSnake(1)->getDirection().getX() << " y: "<<this->getSnake(1)->getDirection().getY() << endl;
 		this->getSnake(0)->resetSnake(2,2,Tuple(1,0));
 		this->getSnake(1)->resetSnake(9,7, Tuple(-1,0));
-		this->bonuses[0] =  Tuple(7,2);
-		this->bonuses[1] = Tuple(4,7);
+		
+		this->bonuses.at(0) = Tuple(7,2);
+		this->bonuses.at(1) = Tuple(4,7);
 		//cout << __FUNCTION__ << "x: " << this->getSnake(1)->getDirection().getX() << " y: "<<this->getSnake(1)->getDirection().getY() << endl;
 }

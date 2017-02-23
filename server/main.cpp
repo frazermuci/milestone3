@@ -139,8 +139,9 @@ void messageHandler(int clientID, string message)
 		time(&timev);		
 		
 		string st = handleBinaryConversion(cm.serialize(c)[0]);
-		
-		os << handleBinaryConversion(cm.serialize(c)[0]) << ":" <<(timev-temp);
+		string bonusPos1 = handleBinaryConversion(cm.serialize(c)[1]);
+		string bonusPos2 = handleBinaryConversion(cm.serialize(c)[2]);
+		os << st << ":" << bonusPos1 << ":" << bonusPos2 << ":" << (timev-temp);
 		cout << os.str() << endl;
 		cm.sendAll(os.str().c_str());
 		os.str("");
