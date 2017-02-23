@@ -97,7 +97,13 @@ function genGetChangeDirection(model) //changes direction of snake associated wi
 	function func(ID,direction)
 	{
 		snake = model.getSnake(ID);
+		if(direction.x == 0){
+		console.log("direction x: ")
+		console.log(direction.x)
+		console.log(model.getSnake(ID).direction.x)
+		}
 		snake.changeDirection(direction);
+		//console.log(ID)
 	}
 	return func;
 }

@@ -140,11 +140,11 @@ Tuple dirToVect(int dir)
 		case 0:
 			return Tuple(1, 0);//Right
 		case 1:
-			return Tuple(0, 1);//Up
+			return Tuple(0, -1);//Up
 		case 2:
 			return Tuple(-1, 0);//Left
 		default:
-			return Tuple(0, -1);//Down			
+			return Tuple(0, 1);//Down			
 	}
 }
 
@@ -200,12 +200,14 @@ void ConnectionManager::handleS2(int ID, Compressed c)
 void ConnectionManager::updateModel(int clientID, int newDir)
 {
 	int ID = this->clientIDWithConnNum[clientID];
+	cout << endl << __FUNCTION__ << "ID: "<<ID<< " new Direction in: " << newDir << endl;  
 	this->model.changeDirection(ID, dirToVect(newDir));
 	//cout << endl << __FUNCTION__ << "ID " << ID<<" vect new dir x: " << dirToVect(newDir).getX() << " y: " << dirToVect(newDir).getY() << endl; 
 	//cout << __FUNCTION__ << "new dir; " << newDir << endl << endl;
-	Tuple head1 = this->model.getSnake(0)->getHead();
-	Tuple head2 = this->model.getSnake(1)->getHead();
-	Snake s1 = *(this->model.getSnake(1));
+	//Tuple head1 = this->model.getSnake(0)->getHead();
+	//Tuple head2 = this->model.getSnake(1)->getHead();
+	Snake s1 = *(this->model.getSnake(ID));
+	cout << __FUNCTION__ <<" NEW DIRECTION: x: " << s1.getDirection().getX() << "y: " << s1.getDirection().getY() << endl;
 	//cout << __FUNCTION__ << "dirx: "<<s1.getDirection().getX() << endl;
 	//cout << __FUNCTION__ << "head 1 x: " << head1.getX() << " y: "<<head1.getY() << endl;
 	//cout << __FUNCTION__ << "head 2 x: " << head2.getX() << " y: "<<head2.getY() << endl;
@@ -233,7 +235,7 @@ int vectToDir(Tuple vect)
 	}
 	else
 	{
-		return vect.getY() == 1 ? 1 : 3;
+		return vect.getY() == 1 ? 3 : 1;
 	}
 }
 
@@ -265,8 +267,8 @@ void ConnectionManager::moveModel(Compressed* c)
         lose2 = true;
     }*/
 
-	cout << "head1x: " << head1.getX() << " | " <<this->model.getBoardWidth() << endl;
-	cout << "head1y: " << head1.getY() << " | " <<this->model.getBoardHeight() << endl;
+	//cout << "head1x: " << head1.getX() << " | " <<this->model.getBoardWidth() << endl;
+	//cout << "head1y: " << head1.getY() << " | " <<this->model.getBoardHeight() << endl;
     // Out of the board
     if(!(head1.getX() >= 0 && head1.getX() < this->model.getBoardWidth() &&\
 	head1.getY() >= 0 && head1.getY() < this->model.getBoardHeight()))
@@ -275,8 +277,8 @@ void ConnectionManager::moveModel(Compressed* c)
 		lose1 = true;
 	}
     
-	cout << "head2x: " << head2.getX() << " | " <<this->model.getBoardWidth() << endl;
-	cout << "head2y: " << head2.getY() << " | " <<this->model.getBoardHeight() << endl;    
+	//cout << "head2x: " << head2.getX() << " | " <<this->model.getBoardWidth() << endl;
+	//cout << "head2y: " << head2.getY() << " | " <<this->model.getBoardHeight() << endl;    
     if(!(head2.getX() >= 0 && head2.getX() < this->model.getBoardWidth() &&\
 	head2.getY() >= 0 && head2.getY() < this->model.getBoardHeight()))
 	{
@@ -457,20 +459,18 @@ unsigned char* ConnectionManager::serialize(Compressed* c)
     return s;
 }
 
-int ConnectionManager::deserialize(unsigned char* s)
+int ConnectionManager::deserialize(int s)
 {
-	unsigned char c = s[0];
-	
-	if(c > 127)
+	if(s > 127)
 	{
-		c-=128;
-		if(c>63)
+		s-=128;
+		if(s>63)
 			return 1; // ----- UP
 		return 3; // --------- DOWN
 	}
 	else
 	{
-		if(c>63)
+		if(s>63)
 			return 0; // ----- RIGHT
 		return 2; // --------- LEFT
 	}

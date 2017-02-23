@@ -108,8 +108,10 @@ void Model::growSnake(int ID)
 
 void Model::changeDirection(int ID, Tuple dir)
 {
-	Snake s = *this->getSnake(ID);
-	s.changeDirection(dir); 
+	//cout << "snake: " << ID << "xDir: " << dir.getX() << " yDir: " << dir.getY() << endl;
+	//Snake s = *this->getSnake(ID);
+	//s.changeDirection(dir); 
+	this->getSnake(ID)->changeDirection(dir);
 }
 
 vector<Tuple> Model::getBonuses()

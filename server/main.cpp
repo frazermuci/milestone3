@@ -109,6 +109,7 @@ string handleBinaryConversion(int i)
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message)
 {
+	cout << endl <<  message << endl << endl;
 	if(cm.isGameOn())
 	{
 	time(&timev);
@@ -118,7 +119,7 @@ void messageHandler(int clientID, string message)
 	if(isInitMessage(mVect.at(0)))
 	{
 		//parse message and get id
-		cout << "clientID: " << clientID << " otherID: " << mVect.at(1) << endl;
+		//cout << "clientID: " << clientID << " otherID: " << mVect.at(1) << endl;
 		initializeConnection(clientID, mVect);
 		return;
 	}
@@ -127,7 +128,7 @@ void messageHandler(int clientID, string message)
 		//update model from message
 		//cout << "desrialize" << endl;
 	       
-		cm.updateModel(clientID, cm.deserialize((unsigned char*)message.c_str()));
+		cm.updateModel(clientID, cm.deserialize(atoi(message.c_str())));
 	}
 	if(cm.stateReady(clientID))
 	{		
@@ -142,7 +143,7 @@ void messageHandler(int clientID, string message)
 		string bonusPos1 = handleBinaryConversion(cm.serialize(c)[1]);
 		string bonusPos2 = handleBinaryConversion(cm.serialize(c)[2]);
 		os << st << ":" << bonusPos1 << ":" << bonusPos2 << ":" << (timev-temp);
-		cout << os.str() << endl;
+		//cout << os.str() << endl;
 		cm.sendAll(os.str().c_str());
 		os.str("");
 		cout << "sendAll\n";

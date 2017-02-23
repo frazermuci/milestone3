@@ -62,7 +62,7 @@ class ConnectionManager
 		void newGame();
 		//Compressed compressModel();
 		unsigned char* serialize(Compressed* c);
-		int deserialize(unsigned char* s);
+		int deserialize(int s);
 };
 
 #endif

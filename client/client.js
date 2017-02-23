@@ -33,11 +33,8 @@ function Socket(model){
 		for(var h =0 ; h < bin.length; ++h)
 		{
 			s[h] = this.convertBinToInt(bin[h]);
-			console.log(this.convertBinToInt(bin[h]));
 		}
 		a= s[0];
-		console.log(a);
-		console.log(s)
 		var s1Dir = new Vector(1,0);
 		var s1Bonus = false;
 		var s1Loss = false;
@@ -66,7 +63,6 @@ function Socket(model){
 			if(a > 63) // Right
 			{
 				a-=64;			
-				console.log(a)
 				s1Dir = new Vector(1,0);
 			}
 			else // Left
@@ -140,8 +136,15 @@ function Socket(model){
 		}
     
 		// SET TO MODEL
-		getModel().changeDirection(0, s1Dir);
-		getModel().changeDirection(1, s2Dir);
+		if(getModel().snakeIndex == 1)
+		{
+			getModel().changeDirection(0, s1Dir);
+		}
+		else
+		{
+			getModel().changeDirection(1, s2Dir);
+		}
+		
 		getModel().growSnake(0);
 		getModel().growSnake(1);
 		if(s1Bonus)
@@ -173,7 +176,6 @@ function Socket(model){
     
 		if(s1Loss && s2Loss)
 		{
-			console.log("heloo")
 			ControllerTie();
 		}
 		else if(s1Loss)
@@ -213,9 +215,7 @@ function Socket(model){
 // Log messages from the server
 	this.connection.onmessage = (e)=> {
 		//this is in scope?
-		console.log("e.data " + e.data)
 		var array = e.data.split(":");
-		console.log(array)
 		calculatedLatency = (first-Math.floor( Date.now() / 1000 ))-parseInt(array[3]);
 		document.getElementById("latency").innerHTML = calculatedLatency;
 /* 		if(this.count)
@@ -228,7 +228,6 @@ function Socket(model){
 		} */
 		if (array[0] == "init")
 		{
-			console.log("init");
 			//array[1] = model.snakeID;
 			this.sendMessage("init:" + model.snakeID);
 		}
@@ -240,17 +239,7 @@ function Socket(model){
 		}
 		else 
 		{
-			console.log("array: " + array[0])
 			this.deserialize(array);
-			var s1 = getModel().snakes[1];
-			console.log("Snake 1: \n")
-			console.log(s1.getBody()[0].x)
-			console.log(s1.getBody()[0].y)
-			console.log("\n")
-			console.log("Snake 2: \n")
-			console.log(s1.getBody()[1].x)
-			console.log(s1.getBody()[1].y)
-			console.log("\n")
 			//ViewRefresh();
 			window.setTimeout(ControllerTick, 750);
 			//ViewRefresh();
