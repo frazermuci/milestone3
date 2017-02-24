@@ -101,11 +101,17 @@ void ConnectionManager::sendIDs()
 {
 	ostringstream os;
 	map<int,int>::iterator a, b;
-	for(a = this->IDs.begin(); a != this->IDs.end(); a++)
+	for(a = this->IDs.begin(); a != this->IDs.end(); ++a)
 	{
-		os <<"start:"<< a->second << ":"<<this->clientIDWithConnNum[a->first];
-		this->server->wsSend(a->first, os.str());
-		os.str("");
+		for(b = this->IDs.begin(); b != this->IDs.end(); ++b)
+		{
+			if(b->second != a->second)
+			{
+				os <<"start:"<< b->second << ":"<<this->clientIDWithConnNum[a->first];
+				this->server->wsSend(a->first, os.str());
+				os.str("");
+			}
+		}
 	}
 }
 

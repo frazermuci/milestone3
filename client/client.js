@@ -148,7 +148,7 @@ function Socket(model){
 		if(s1Bonus)
 		{
 			getModel().getSnake(0).eatBonus();
-        
+			getModel.score[0] +=100
 			var bonusToChange = 1;
 			var newBonusPos = new Vector(s1BonusX, s1BonusY);
 			var snake1Head = getModel().getSnake(0).getHead();
@@ -161,7 +161,7 @@ function Socket(model){
 		if(s2Bonus)
 		{
 			getModel().getSnake(1).eatBonus();
-        
+			getModel().score[1] +=100
 			var bonusToChange = 1;
 			var newBonusPos = new Vector(s2BonusX, s2BonusY);
 			var snake1Head = getModel().getSnake(1).getHead();
@@ -171,7 +171,7 @@ function Socket(model){
         
 			getModel().bonuses[bonusToChange] = newBonusPos;
 		}
-    
+		//document.getElementById("toptitle").innerHTML = getModel().ids[0]+"Score: "+getModel().score[0] + " - "+ getModel().ids[1] + "Score: " + getModel().score[0]
 		if(s1Loss && s2Loss)
 		{
 			ControllerTie();
@@ -216,10 +216,10 @@ function Socket(model){
 		var array = e.data.split(":");
 		//console.log(array)
 		console.log((Math.floor( Date.now() / 1000 ))-first);
-		console.log(parseInt(array[3]));
+		//console.log(parseInt(array[3]));
 		//console.log(array[3]);
 		calculatedLatency = (Math.floor( Date.now() / 1000 )-first);//-parseInt(array[3]);
-		document.getElementById("latency").innerHTML = calculatedLatency;
+		document.getElementById("latency").innerHTML = calculatedLatency == null ? 0 : calculatedLatency;
 
 		if (array[0] == "init")
 		{
@@ -227,8 +227,11 @@ function Socket(model){
 		}
 		else if(array[0] == "start")
 		{
-			parseInt(array[1]);//ID
+			//ID
 			getModel().snakeIndex = parseInt(array[2]);
+			var temp = getModel().snakeIndex == 1 ? 0 : 1;
+			getModel().ids[temp] = parseInt(array[1]);
+			getModel().ids[getModel().snakeIndex] = getModel().snakeID;
 			window.setTimeout(ControllerTick, 750);
 		}
 		else 
