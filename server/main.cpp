@@ -148,7 +148,7 @@ void messageHandler(int clientID, string message)
 	{
 		time(&timev);
 		time_t tempTime = timev;
-		cout << message << endl;
+		//cout << message << endl;
 		vector<string> mVect = parseMessage(message);
 		if(isInitMessage(mVect.at(0)))
 		{
@@ -180,7 +180,6 @@ void inPeriodic()
 	QueueQuintuple qp;
 	vector<QueueQuintuple> rejectList = vector<QueueQuintuple>();
 	decrementDelays();
-	cout << __FUNCTION__ <<  "  "<<messageQueue.top().delay << endl;
 	while(messageQueue.size()!=0 && (qp = messageQueue.top()).delay <= 0)
 	{
 		messageQueue.pop();
@@ -195,10 +194,10 @@ void inPeriodic()
 			string bonusPos2 = handleBinaryConversion(cm.serialize(c)[2]);
 			time(&timev);
 			os << st << ":" << bonusPos1 << ":" << bonusPos2 << ":" << timev-qp.timestamp;
+			//cout << " time stamp: " << timev-qp.timestamp << endl;
 			//cout << os.str() << endl;
 			cm.sendAll(os.str().c_str());
 			os.str("");
-			cout << "sendAll\n";
 			free(c);
 		}
 		else
@@ -218,12 +217,12 @@ void inPeriodic()
 void periodicHandler(){
 	if(cm.connReady())
 	{
-		static time_t next = time(NULL) + 3;
+		static time_t next = time(NULL) + 2;
 		time_t current = time(NULL);
 		if (current >= next){
 		
 			inPeriodic();
-			next = time(NULL) + 3;
+			next = time(NULL) + 2;
 		}
 	}
 }

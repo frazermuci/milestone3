@@ -214,8 +214,11 @@ function Socket(model){
 	this.connection.onmessage = (e)=> {
 		//this is in scope?
 		var array = e.data.split(":");
-		console.log(array)
-		calculatedLatency = (first-Math.floor( Date.now() / 1000 ))-parseInt(array[3]);
+		//console.log(array)
+		console.log((Math.floor( Date.now() / 1000 ))-first);
+		////console.log(parseInt(array[3]));
+		//console.log(array[3]);
+		calculatedLatency = (Math.floor( Date.now() / 1000 )-first)-parseInt(array[3]);
 		document.getElementById("latency").innerHTML = calculatedLatency;
 
 		if (array[0] == "init")

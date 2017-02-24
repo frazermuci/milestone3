@@ -254,8 +254,8 @@ void ConnectionManager::moveModel(Compressed* c)
     bool lose1 = false;
     bool lose2 = false;
 
-	//cout << "head1x: " << head1.getX() << " | " <<this->model.getBoardWidth() << endl;
-	//cout << "head1y: " << head1.getY() << " | " <<this->model.getBoardHeight() << endl;
+	cout << "head1x: " << head1.getX() << " | " <<this->model.getBoardWidth() << endl;
+	cout << "head1y: " << head1.getY() << " | " <<this->model.getBoardHeight() << endl;
     // Out of the board
     if(!(head1.getX() >= 0 && head1.getX() < this->model.getBoardWidth() &&\
 	head1.getY() >= 0 && head1.getY() < this->model.getBoardHeight()))
@@ -264,8 +264,8 @@ void ConnectionManager::moveModel(Compressed* c)
 		lose1 = true;
 	}
     
-	//cout << "head2x: " << head2.getX() << " | " <<this->model.getBoardWidth() << endl;
-	//cout << "head2y: " << head2.getY() << " | " <<this->model.getBoardHeight() << endl;    
+	cout << "head2x: " << head2.getX() << " | " <<this->model.getBoardWidth() << endl;
+	cout << "head2y: " << head2.getY() << " | " <<this->model.getBoardHeight() << endl;    
     if(!(head2.getX() >= 0 && head2.getX() < this->model.getBoardWidth() &&\
 	head2.getY() >= 0 && head2.getY() < this->model.getBoardHeight()))
 	{
