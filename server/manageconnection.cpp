@@ -14,10 +14,11 @@ ConnectionManager::ConnectionManager(webSocket *server, int width, int height)
 {
 	this->server = server;
 	this->IDs = map<int,int>();//if client disconnects and reconnects, it will cause state
-	this->state = map<int,bool>();
+	//this->state = map<int,bool>();
 	this->model	 = Model(width, height); 
 	this->clientIDWithConnNum = map<int,int>();
 	this->gameOn = true;
+	this->sequenceMap = map<int,map<int, bool> >();
 }
 
 bool ConnectionManager::isGameOn()
@@ -118,16 +119,18 @@ bool ready(map<int,bool> state)
 	return state.size() == 2;
 }
 
-bool ConnectionManager::stateReady(int clientID)
+bool ConnectionManager::stateReady(int clientID, int seqNum)
 {
-	this->state[clientID] = true;
+	/*this->state[clientID] = true;
 	bool r = ready(this->state);
-  cout << __FUNCTION__ << ": " << "State r [" << r << "]" << endl;
+    cout << __FUNCTION__ << ": " << "State r [" << r << "]" << endl;
 	if(r)
 	{
 		this->state = map<int,bool>();
 	}
-	return r;
+	return r;*/
+	this->sequenceMap[seqNum][clientID] = true;
+	return this->sequenceMap[seqNum].size() == 2;
 }
 
 Tuple dirToVect(int dir)
@@ -257,8 +260,8 @@ void ConnectionManager::moveModel(Compressed* c)
     bool lose1 = false;
     bool lose2 = false;
 
-	//cout << "head1x: " << head1.getX() << " | " <<this->model.getBoardWidth() << endl;
-	//cout << "head1y: " << head1.getY() << " | " <<this->model.getBoardHeight() << endl;
+	cout << "head1x: " << head1.getX() << " | " <<this->model.getBoardWidth() << endl;
+	cout << "head1y: " << head1.getY() << " | " <<this->model.getBoardHeight() << endl;
     // Out of the board
     if(!(head1.getX() >= 0 && head1.getX() < this->model.getBoardWidth() &&\
 	head1.getY() >= 0 && head1.getY() < this->model.getBoardHeight()))
@@ -267,8 +270,8 @@ void ConnectionManager::moveModel(Compressed* c)
 		lose1 = true;
 	}
     
-	//cout << "head2x: " << head2.getX() << " | " <<this->model.getBoardWidth() << endl;
-	//cout << "head2y: " << head2.getY() << " | " <<this->model.getBoardHeight() << endl;    
+	cout << "head2x: " << head2.getX() << " | " <<this->model.getBoardWidth() << endl;
+	cout << "head2y: " << head2.getY() << " | " <<this->model.getBoardHeight() << endl;    
     if(!(head2.getX() >= 0 && head2.getX() < this->model.getBoardWidth() &&\
 	head2.getY() >= 0 && head2.getY() < this->model.getBoardHeight()))
 	{

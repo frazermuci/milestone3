@@ -5,19 +5,36 @@
 #include <time.h>
 #include "websocket.h"
 #include <cstring>
+#include <queue>
+#include <vector>
+#include <utility>
 #include "manageconnection.h"
 
 using namespace std;
 
+struct QueueQuintuple
+{
+	string message;
+	int delay;
+	int clientID;
+	int timestamp;
+	int seqNum;
+	bool operator() (QueueQuintuple& qp1,QueueQuintuple& qp2)
+    {
+        return qp1.delay > qp2.delay;
+    }
+};
+
 //struct for serialization
-
+//srand(time(NULL));
 webSocket server;
+ConnectionManager cm = ConnectionManager(&server, 12, 9);
+priority_queue <QueueQuintuple, vector<QueueQuintuple>, QueueQuintuple> messageQueue;
+//maps clientID with sequence count;
+map<int,int> clientIDSequenceCount = map<int,int>();
 
-ConnectionManager cm = ConnectionManager(&server, 12, 9);//server is not initialized..well see.
-//ConnectionManager cm = ConnectionManager(&server, 9, 12);
 int gcount = 0;
 time_t  timev;
-//time(&timev);
 
 /* called when a client connects */
 void openHandler(int clientID)
@@ -29,6 +46,7 @@ void openHandler(int clientID)
 	//os << "init"<<":"<<isZero?"2:2":"4:4";
 	
 	cm.connNumWithClientID(clientID, gcount);
+	clientIDSequenceCount[clientID] = 0;
 	time(&timev);
 	os << "init:" << gcount << ":" <<(timev-temp);
   cout << __FUNCTION__ << ": " << "init sends [" << os.str() <<"]" << endl;
@@ -115,11 +133,11 @@ string handleBinaryConversion(int i)
 void messageHandler(int clientID, string message)
 {
   cout << __FUNCTION__ << ": " <<"message : [" << message << "]" << endl;
+	//puts message in buffer
 	if(cm.isGameOn())
 	{
 	time(&timev);
-	time_t temp = timev;
-	//cout << message << endl;
+	cout << message << endl;
 	vector<string> mVect = parseMessage(message);
 	if(isInitMessage(mVect.at(0)))
 	{
@@ -128,17 +146,74 @@ void messageHandler(int clientID, string message)
 		initializeConnection(clientID, mVect);
 		return;
 	}
+		QueueQuintuple qp = QueueQuintuple();
+		qp.message = message;		
+		qp.clientID = clientID;
+		qp.timestamp = timev;
+		qp.delay = (static_cast<int>(floor(rand() *  3))+1) % 3;
+		//cout << __FUNCTION__ << " delay: " << qp.delay << endl;
+		if(qp.delay < 0)
+		{
+			qp.delay*=-1;
+		}
+		messageQueue.push(qp);
+		clientIDSequenceCount[clientID] = clientIDSequenceCount[clientID]+1;
+	}
+}
+
+void decrementDelays()
+{
+	vector<QueueQuintuple> temp = vector<QueueQuintuple>();
+	while(messageQueue.size() != 0)
+	{
+		QueueQuintuple qp = messageQueue.top();
+		qp.delay--;
+		temp.push_back(qp);
+		messageQueue.pop();
+	}
+	for(vector<QueueQuintuple>::iterator it = temp.begin(); it!= temp.end(); ++it)
+	{
+		messageQueue.push(*it);
+	}
+}
+/* called when a client sends a message to the server */
+void inPeriodic()
+{
+	//cout << endl <<  message << endl << endl;
+	/*if(cm.isGameOn())
+	{
+	time(&timev);
+	time_t temp = timev;
+	//cout << message << endl;
+	vector<string> mVect = parseMessage(message);
+	if(isInitMessage(mVect.at(0)))
+	{
+		//parse message and get id
+		//cout << "clientID: " << clientID << " otherID: " << mVect.at(1) << endl;
+		initializeConnection(clientID, mVect);
+		return;
+	}
 	if(cm.connReady())
 	{
 		//update model from message
     cout << __FUNCTION__ << ": " << "deserialize (uchar): " << (unsigned char)message[0] << endl;
     cm.updateModel(clientID, cm.deserialize((unsigned char*)message.c_str()));
-	}
-	if(cm.stateReady(clientID))
+	}*/
+		//serializing new state
+	ostringstream os;		
+	QueueQuintuple qp;
+	vector<QueueQuintuple> rejectList = vector<QueueQuintuple>();
+	decrementDelays();
+	cout << __FUNCTION__ <<  "  "<<messageQueue.top().delay << endl;
+	while(messageQueue.size()!=0 && (qp = messageQueue.top()).delay <= 0)
+	{
+		messageQueue.pop();
+		
+		if(cm.stateReady(qp.clientID, qp.seqNum))
 	{		
+			//cout << __FUNCTION__ << endl;
 		//serializing new state
 		Compressed* c = static_cast<Compressed*>(malloc(sizeof(struct Compressed)));
-		
 		cm.moveModel(c);
 		ostringstream os;
 		time(&timev);		
@@ -146,34 +221,42 @@ void messageHandler(int clientID, string message)
 //		string st = handleBinaryConversion(cm.serialize(c)[0]);
 //		string bonusPos1 = handleBinaryConversion(cm.serialize(c)[1]);
 //		string bonusPos2 = handleBinaryConversion(cm.serialize(c)[2]);
-		os << cm.serialize(c) /*<< ":" << (timev-temp)*/;
+//    	os << st << ":" << bonusPos1 << ":" << bonusPos2 << ":" << timev-qp.timestamp;
+		os << cm.serialize(c);
     cout << __FUNCTION__ << ": " << "serialize : " << os.str() << endl;
 		cm.sendAll(os.str());
 		os.str("");
-			
+
 		free(c);
+		}
+		else
+		{
+			rejectList.push_back(qp);
+		}
 	}
+	for(vector<QueueQuintuple>::iterator it = rejectList.begin(); it != rejectList.end(); ++it)
+	{
+		messageQueue.push(*it);
 	}
+			
+		
 }
 
 /* called once per select() loop */
-/*void periodicHandler(){
-    static time_t next = time(NULL) + 10;
-    time_t current = time(NULL);
-    if (current >= next){
-        ostringstream os;
-        string timestring = ctime(&current);
-        timestring = timestring.substr(0, timestring.size() - 1);
-        os << timestring;
-
-        vector<int> clientIDs = server.getClientIDs();
-        for (int i = 0; i < clientIDs.size(); i++)
-            server.wsSend(clientIDs[i], os.str());
-
-        next = time(NULL) + 10;
-    }
+void periodicHandler()
+{
+	if(cm.connReady())
+	{
+		static time_t next = time(NULL) + 2;
+		time_t current = time(NULL);
+		if (current >= next)
+		{
+			inPeriodic();
+			next = time(NULL) + 2;
+		}
+	}
 }
-*/
+
 int main(int argc, char *argv[]){
     int port  = 21234;
 
@@ -184,7 +267,7 @@ int main(int argc, char *argv[]){
     server.setOpenHandler(openHandler);
     server.setCloseHandler(closeHandler);
     server.setMessageHandler(messageHandler);
-    //server.setPeriodicHandler(periodicHandler);
+    server.setPeriodicHandler(periodicHandler);
 
     /* start the chatroom server, listen to ip '127.0.0.1' and port '8000' */
     server.startServer(port);
