@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <string>
+#include <queue>
 #include <sstream>
 #include <cstring>
 #include <time.h>
@@ -9,11 +10,28 @@
 
 using namespace std;
 
+struct QueueQuintuple
+{
+	string message;
+	int delay;
+	int clientID;
+	int timestamp;
+	int seqNum;
+	bool operator() (QueueQuintuple& qp1,QueueQuintuple& qp2)
+    {
+        //return qp1.delay > qp2.delay;
+		return qp1.seqNum > qp2.seqNum;
+    }
+};
+
 //struct for serialization
 
 webSocket server;
 ConnectionManager cm = ConnectionManager(&server, 12, 9);//server is not initialized..well see.
 //ConnectionManager cm = ConnectionManager(&server, 9, 12);
+priority_queue <QueueQuintuple, vector<QueueQuintuple>, QueueQuintuple> messageQueue;
+//maps clientID with sequence count;
+map<int,int> clientIDSequenceCount = map<int,int>();
 int count = 0;
 time_t  timev;
 //time(&timev);
@@ -28,6 +46,8 @@ void openHandler(int clientID)
 	//os << "init"<<":"<<isZero?"2:2":"4:4";
 	
 	cm.connNumWithClientID(clientID, count);
+	
+	clientIDSequenceCount[clientID] = 0;
 	time(&timev);
 	os << "init:" << count << ":" <<(timev-temp);
 	cm.send(clientID, os.str());
@@ -105,71 +125,108 @@ string handleBinaryConversion(int i)
 	}
 	return os.str();
 }
+void decrementDelays()
+{
+	vector<QueueQuintuple> temp = vector<QueueQuintuple>();
+	while(messageQueue.size() != 0)
+	{
+		QueueQuintuple qp = messageQueue.top();
+		qp.delay--;
+		temp.push_back(qp);
+		messageQueue.pop();
+	}
+	for(vector<QueueQuintuple>::iterator it = temp.begin(); it!= temp.end(); ++it)
+	{
+		messageQueue.push(*it);
+	}
+}
 
 /* called when a client sends a message to the server */
 void messageHandler(int clientID, string message)
 {
-	//cout << endl <<  message << endl << endl;
 	if(cm.isGameOn())
 	{
-	time(&timev);
-	time_t temp = timev;
-	//cout << message << endl;
-	vector<string> mVect = parseMessage(message);
-	if(isInitMessage(mVect.at(0)))
-	{
-		//parse message and get id
-		//cout << "clientID: " << clientID << " otherID: " << mVect.at(1) << endl;
-		initializeConnection(clientID, mVect);
-		return;
-	}
-	if(cm.connReady())
-	{
-		//update model from message
-		//cout << "desrialize" << endl;
-	       
+		time(&timev);
+		time_t tempTime = timev;
+		cout << message << endl;
+		vector<string> mVect = parseMessage(message);
+		if(isInitMessage(mVect.at(0)))
+		{
+			//parse message and get id
+			//cout << "clientID: " << clientID << " otherID: " << mVect.at(1) << endl;
+			initializeConnection(clientID, mVect);
+			return;
+		}
 		cm.updateModel(clientID, cm.deserialize(atoi(message.c_str())));
-	}
-	if(cm.stateReady(clientID))
-	{		
-		//serializing new state
-		Compressed* c = static_cast<Compressed*>(malloc(sizeof(struct Compressed)));
-		
-		cm.moveModel(c);
-		ostringstream os;
-		time(&timev);		
-		
-		string st = handleBinaryConversion(cm.serialize(c)[0]);
-		string bonusPos1 = handleBinaryConversion(cm.serialize(c)[1]);
-		string bonusPos2 = handleBinaryConversion(cm.serialize(c)[2]);
-		os << st << ":" << bonusPos1 << ":" << bonusPos2 << ":" << (timev-temp);
-		cout << os.str() << endl;
-		cm.sendAll(os.str().c_str());
-		os.str("");
-		cout << "sendAll\n";
-			
-		free(c);
-	}
+		QueueQuintuple qp = QueueQuintuple();
+		qp.message = message;		
+		qp.clientID = clientID;
+		qp.timestamp = tempTime;
+		qp.delay = (static_cast<int>(floor(rand() *  3))+1) % 3;
+		//cout << __FUNCTION__ << " delay: " << qp.delay << endl;
+		if(qp.delay < 0)
+		{
+			qp.delay*=-1;
+		}
+		messageQueue.push(qp);
+		clientIDSequenceCount[clientID] = clientIDSequenceCount[clientID]+1;
 	}
 }
 
+void inPeriodic()
+{
+		//serializing new state
+	ostringstream os;		
+	QueueQuintuple qp;
+	vector<QueueQuintuple> rejectList = vector<QueueQuintuple>();
+	decrementDelays();
+	cout << __FUNCTION__ <<  "  "<<messageQueue.top().delay << endl;
+	while(messageQueue.size()!=0 && (qp = messageQueue.top()).delay <= 0)
+	{
+		messageQueue.pop();
+		
+		if(cm.stateReady(qp.clientID, qp.seqNum))
+		{
+			//cout << __FUNCTION__ << endl;
+			Compressed* c = static_cast<Compressed*>(malloc(sizeof(struct Compressed)));
+			cm.moveModel(c);
+			string st = handleBinaryConversion(cm.serialize(c)[0]);
+			string bonusPos1 = handleBinaryConversion(cm.serialize(c)[1]);
+			string bonusPos2 = handleBinaryConversion(cm.serialize(c)[2]);
+			time(&timev);
+			os << st << ":" << bonusPos1 << ":" << bonusPos2 << ":" << timev-qp.timestamp;
+			//cout << os.str() << endl;
+			cm.sendAll(os.str().c_str());
+			os.str("");
+			cout << "sendAll\n";
+			free(c);
+		}
+		else
+		{
+			rejectList.push_back(qp);
+		}
+	}
+	for(vector<QueueQuintuple>::iterator it = rejectList.begin(); it != rejectList.end(); ++it)
+	{
+		messageQueue.push(*it);
+	}
+			
+		
+}
+
 /* called orrnce per select() loop */
-/*void periodicHandler(){
-    static time_t next = time(NULL) + 10;
-    time_t current = time(NULL);
-    if (current >= next){
-        ostringstream os;
-        string timestring = ctime(&current);
-        timestring = timestring.substr(0, timestring.size() - 1);
-        os << timestring;
-
-        vector<int> clientIDs = server.getClientIDs();
-        for (int i = 0; i < clientIDs.size(); i++)
-            server.wsSend(clientIDs[i], os.str());
-
-        next = time(NULL) + 10;
-    }
-}*/
+void periodicHandler(){
+	if(cm.connReady())
+	{
+		static time_t next = time(NULL) + 3;
+		time_t current = time(NULL);
+		if (current >= next){
+		
+			inPeriodic();
+			next = time(NULL) + 3;
+		}
+	}
+}
 
 int main(int argc, char *argv[]){
     int port  = 21234;
@@ -181,7 +238,7 @@ int main(int argc, char *argv[]){
     server.setOpenHandler(openHandler);
     server.setCloseHandler(closeHandler);
     server.setMessageHandler(messageHandler);
-    //server.setPeriodicHandler(periodicHandler);
+    server.setPeriodicHandler(periodicHandler);
 
     /* start the chatroom server, listen to ip '127.0.0.1' and port '8000' */
     server.startServer(port);

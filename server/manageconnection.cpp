@@ -18,6 +18,7 @@ ConnectionManager::ConnectionManager(webSocket *server, int width, int height)
 	this->model	 = Model(width, height); 
 	this->clientIDWithConnNum = map<int,int>();
 	this->gameOn = true;
+	this->sequenceMap = map<int,map<int, bool> >();
 }
 
 bool ConnectionManager::isGameOn()
@@ -113,15 +114,17 @@ bool ready(map<int,bool> state)
 	return state.size() == 2;
 }
 
-bool ConnectionManager::stateReady(int clientID)
+bool ConnectionManager::stateReady(int clientID, int seqNum)
 {
-	this->state[clientID] = true;
+	/*this->state[clientID] = true;
 	bool r = ready(this->state);
 	if(r)
 	{
 		this->state = map<int,bool>();
 	}
-	return r;
+	return r;*/
+	this->sequenceMap[seqNum][clientID] = true;
+	return this->sequenceMap[seqNum].size() == 2;
 }
 
 Tuple dirToVect(int dir)
@@ -401,6 +404,7 @@ unsigned char* ConnectionManager::serialize(Compressed* c)
 
 int ConnectionManager::deserialize(int s)
 {
+	
 	if(s > 127)
 	{
 		s-=128;
