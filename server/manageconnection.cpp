@@ -14,7 +14,7 @@ ConnectionManager::ConnectionManager(webSocket *server, int width, int height)
 {
 	this->server = server;
 	this->IDs = map<int,int>();//if client disconnects and reconnects, it will cause state
-	//this->state = map<int,bool>();
+	this->state = map<int,bool>();
 	this->model	 = Model(width, height); 
 	this->clientIDWithConnNum = map<int,int>();
 	this->gameOn = true;
@@ -85,7 +85,7 @@ void ConnectionManager::removeConn(int ID)
 
 void ConnectionManager::send(int clientID, string message)
 {
-  cout << __FUNCTION__ << ": " << "cm.send.Sending [" << message << "]" << endl;
+  cout << __FUNCTION__ << ": " << " Sending [" << message << "]" << endl;
 	this->server->wsSend(clientID, message);
 }
 
@@ -94,8 +94,7 @@ void ConnectionManager::sendAll(string message)
 	map<int, int>::iterator it;
     for (it = this->IDs.begin(); it != this->IDs.end(); it++)
 	{
-    cout << __FUNCTION__ << ": " << "cm.sendAll.Sending [" << message << "] to client [" << it->first << "]" << endl;
-		//this->server->wsSend(it->first, message);
+    cout << __FUNCTION__ << ": " << " Sending [" << message << "] to client [" << it->first << "]" << endl;
 		this->send(it->first, message);
 	}
 }
@@ -424,7 +423,7 @@ int ConnectionManager::deserialize(unsigned char* s)
   int ret = -1;
 	
   if(a == '0') // Right
-{
+  {
 		ret = 0; // ----- RIGHT
   }
   else if(a == '1') // Up
@@ -441,9 +440,10 @@ int ConnectionManager::deserialize(unsigned char* s)
 	}
 	else
 	{
-    cout << "ERROR direction 1 coding" << endl;
+    cout << __FUNCTION__  << " : ERROR direction coding" << endl;
 	}
-  cout << __FUNCTION__ << ": return direction [" << ret << "]" << endl;
+
+  cout << __FUNCTION__ << " : return direction [" << ret << "]" << endl;
   return ret;
 }
 
